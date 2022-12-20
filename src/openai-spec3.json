@@ -31,43 +31,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "object": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "title": "Engine",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "created": {
-                            "type": "integer",
-                            "nullable": true
-                          },
-                          "ready": {
-                            "type": "boolean"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "object",
-                          "created",
-                          "ready"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "object",
-                    "data"
-                  ]
+                  "$ref": "#/components/schemas/ListEnginesResponse"
                 }
               }
             }
@@ -112,28 +76,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Engine",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "object": {
-                      "type": "string"
-                    },
-                    "created": {
-                      "type": "integer",
-                      "nullable": true
-                    },
-                    "ready": {
-                      "type": "boolean"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "object",
-                    "created",
-                    "ready"
-                  ]
+                  "$ref": "#/components/schemas/Engine"
                 }
               }
             }
@@ -152,6 +95,49 @@
         }
       }
     },
+    "/completions": {
+      "post": {
+        "operationId": "createCompletion",
+        "tags": [
+          "OpenAI"
+        ],
+        "summary": "Creates a completion for the provided prompt and parameters",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCompletionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCompletionResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-oaiMeta": {
+          "name": "Create completion",
+          "group": "completions",
+          "path": "create",
+          "examples": {
+            "curl": "curl https://api.openai.com/v1/completions \\\n  -H 'Content-Type: application/json' \\\n  -H 'Authorization: Bearer YOUR_API_KEY' \\\n  -d '{\n  \"model\": \"VAR_model_id\",\n  \"prompt\": \"Say this is a test\",\n  \"max_tokens\": 7,\n  \"temperature\": 0\n}'\n",
+            "python": "import os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\nopenai.Completion.create(\n  model=\"VAR_model_id\",\n  prompt=\"Say this is a test\",\n  max_tokens=7,\n  temperature=0\n)\n",
+            "node.js": "const { Configuration, OpenAIApi } = require(\"openai\");\nconst configuration = new Configuration({\n  apiKey: process.env.OPENAI_API_KEY,\n});\nconst openai = new OpenAIApi(configuration);\nconst response = await openai.createCompletion({\n  model: \"VAR_model_id\",\n  prompt: \"Say this is a test\",\n  max_tokens: 7,\n  temperature: 0,\n});\n"
+          },
+          "parameters": "{\n  \"model\": \"VAR_model_id\",\n  \"prompt\": \"Say this is a test\",\n  \"max_tokens\": 7,\n  \"temperature\": 0,\n  \"top_p\": 1,\n  \"n\": 1,\n  \"stream\": false,\n  \"logprobs\": null,\n  \"stop\": \"\\n\"\n}\n",
+          "response": "{\n  \"id\": \"cmpl-uqkvlQyYK7bGYrRHQ0eXlWi7\",\n  \"object\": \"text_completion\",\n  \"created\": 1589478378,\n  \"model\": \"VAR_model_id\",\n  \"choices\": [\n    {\n      \"text\": \"\\n\\nThis is indeed a test\",\n      \"index\": 0,\n      \"logprobs\": null,\n      \"finish_reason\": \"length\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 5,\n    \"completion_tokens\": 7,\n    \"total_tokens\": 12\n  }\n}\n"
+        }
+      }
+    },
     "/edits": {
       "post": {
         "operationId": "createEdit",
@@ -164,56 +150,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "model": {
-                    "description": "ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them.",
-                    "type": "string"
-                  },
-                  "input": {
-                    "description": "The input text to use as a starting point for the edit.",
-                    "type": "string",
-                    "default": "",
-                    "nullable": true,
-                    "example": "What day of the wek is it?"
-                  },
-                  "instruction": {
-                    "description": "The instruction that tells the model how to edit the prompt.",
-                    "type": "string",
-                    "example": "Fix the spelling mistakes."
-                  },
-                  "n": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 20,
-                    "default": 1,
-                    "example": 1,
-                    "nullable": true,
-                    "description": "How many edits to generate for the input and instruction."
-                  },
-                  "temperature": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 2,
-                    "default": 1,
-                    "example": 1,
-                    "nullable": true,
-                    "description": "What [sampling temperature](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277) to use. Higher values means the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.\n\nWe generally recommend altering this or `top_p` but not both.\n"
-                  },
-                  "top_p": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 1,
-                    "default": 1,
-                    "example": 1,
-                    "nullable": true,
-                    "description": "An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.\n\nWe generally recommend altering this or `temperature` but not both.\n"
-                  }
-                },
-                "required": [
-                  "model",
-                  "instruction"
-                ]
+                "$ref": "#/components/schemas/CreateEditRequest"
               }
             }
           }
@@ -224,95 +161,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "object": {
-                      "type": "string"
-                    },
-                    "created": {
-                      "type": "integer"
-                    },
-                    "model": {
-                      "type": "string"
-                    },
-                    "choices": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "text": {
-                            "type": "string"
-                          },
-                          "index": {
-                            "type": "integer"
-                          },
-                          "logprobs": {
-                            "type": "object",
-                            "nullable": true,
-                            "properties": {
-                              "tokens": {
-                                "type": "array",
-                                "items": {
-                                  "type": "string"
-                                }
-                              },
-                              "token_logprobs": {
-                                "type": "array",
-                                "items": {
-                                  "type": "number"
-                                }
-                              },
-                              "top_logprobs": {
-                                "type": "array",
-                                "items": {
-                                  "type": "object"
-                                }
-                              },
-                              "text_offset": {
-                                "type": "array",
-                                "items": {
-                                  "type": "integer"
-                                }
-                              }
-                            }
-                          },
-                          "finish_reason": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    },
-                    "usage": {
-                      "type": "object",
-                      "properties": {
-                        "prompt_tokens": {
-                          "type": "integer"
-                        },
-                        "completion_tokens": {
-                          "type": "integer"
-                        },
-                        "total_tokens": {
-                          "type": "integer"
-                        }
-                      },
-                      "required": [
-                        "prompt_tokens",
-                        "completion_tokens",
-                        "total_tokens"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "object",
-                    "created",
-                    "model",
-                    "choices",
-                    "usage"
-                  ]
+                  "$ref": "#/components/schemas/CreateEditResponse"
                 }
               }
             }
@@ -344,54 +193,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "prompt": {
-                    "description": "A text description of the desired image(s). The maximum length is 1000 characters.",
-                    "type": "string",
-                    "example": "A cute baby sea otter"
-                  },
-                  "n": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 10,
-                    "default": 1,
-                    "example": 1,
-                    "nullable": true,
-                    "description": "The number of images to generate. Must be between 1 and 10."
-                  },
-                  "size": {
-                    "type": "string",
-                    "enum": [
-                      "256x256",
-                      "512x512",
-                      "1024x1024"
-                    ],
-                    "default": "1024x1024",
-                    "example": "1024x1024",
-                    "nullable": true,
-                    "description": "The size of the generated images. Must be one of `256x256`, `512x512`, or `1024x1024`."
-                  },
-                  "response_format": {
-                    "type": "string",
-                    "enum": [
-                      "url",
-                      "b64_json"
-                    ],
-                    "default": "url",
-                    "example": "url",
-                    "nullable": true,
-                    "description": "The format in which the generated images are returned. Must be one of `url` or `b64_json`."
-                  },
-                  "user": {
-                    "type": "string",
-                    "example": "user-1234",
-                    "description": "A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).\n"
-                  }
-                },
-                "required": [
-                  "prompt"
-                ]
+                "$ref": "#/components/schemas/CreateImageRequest"
               }
             }
           }
@@ -402,29 +204,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "properties": {
-                    "created": {
-                      "type": "integer"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "url": {
-                            "type": "string"
-                          },
-                          "b64_json": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "created",
-                    "data"
-                  ]
+                  "$ref": "#/components/schemas/ImagesResponse"
                 }
               }
             }
@@ -456,65 +236,7 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "image": {
-                    "description": "The image to edit. Must be a valid PNG file, less than 4MB, and square. If mask is not provided, image must have transparency, which will be used as the mask.",
-                    "type": "string",
-                    "format": "binary"
-                  },
-                  "mask": {
-                    "description": "An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where `image` should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as `image`.",
-                    "type": "string",
-                    "format": "binary"
-                  },
-                  "prompt": {
-                    "description": "A text description of the desired image(s). The maximum length is 1000 characters.",
-                    "type": "string",
-                    "example": "A cute baby sea otter wearing a beret"
-                  },
-                  "n": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 10,
-                    "default": 1,
-                    "example": 1,
-                    "nullable": true,
-                    "description": "The number of images to generate. Must be between 1 and 10."
-                  },
-                  "size": {
-                    "type": "string",
-                    "enum": [
-                      "256x256",
-                      "512x512",
-                      "1024x1024"
-                    ],
-                    "default": "1024x1024",
-                    "example": "1024x1024",
-                    "nullable": true,
-                    "description": "The size of the generated images. Must be one of `256x256`, `512x512`, or `1024x1024`."
-                  },
-                  "response_format": {
-                    "type": "string",
-                    "enum": [
-                      "url",
-                      "b64_json"
-                    ],
-                    "default": "url",
-                    "example": "url",
-                    "nullable": true,
-                    "description": "The format in which the generated images are returned. Must be one of `url` or `b64_json`."
-                  },
-                  "user": {
-                    "type": "string",
-                    "example": "user-1234",
-                    "description": "A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).\n"
-                  }
-                },
-                "required": [
-                  "prompt",
-                  "image"
-                ]
+                "$ref": "#/components/schemas/CreateImageEditRequest"
               }
             }
           }
@@ -525,29 +247,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "properties": {
-                    "created": {
-                      "type": "integer"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "url": {
-                            "type": "string"
-                          },
-                          "b64_json": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "created",
-                    "data"
-                  ]
+                  "$ref": "#/components/schemas/ImagesResponse"
                 }
               }
             }
@@ -578,54 +278,7 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "image": {
-                    "description": "The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.",
-                    "type": "string",
-                    "format": "binary"
-                  },
-                  "n": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 10,
-                    "default": 1,
-                    "example": 1,
-                    "nullable": true,
-                    "description": "The number of images to generate. Must be between 1 and 10."
-                  },
-                  "size": {
-                    "type": "string",
-                    "enum": [
-                      "256x256",
-                      "512x512",
-                      "1024x1024"
-                    ],
-                    "default": "1024x1024",
-                    "example": "1024x1024",
-                    "nullable": true,
-                    "description": "The size of the generated images. Must be one of `256x256`, `512x512`, or `1024x1024`."
-                  },
-                  "response_format": {
-                    "type": "string",
-                    "enum": [
-                      "url",
-                      "b64_json"
-                    ],
-                    "default": "url",
-                    "example": "url",
-                    "nullable": true,
-                    "description": "The format in which the generated images are returned. Must be one of `url` or `b64_json`."
-                  },
-                  "user": {
-                    "type": "string",
-                    "example": "user-1234",
-                    "description": "A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).\n"
-                  }
-                },
-                "required": [
-                  "image"
-                ]
+                "$ref": "#/components/schemas/CreateImageVariationRequest"
               }
             }
           }
@@ -636,29 +289,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "properties": {
-                    "created": {
-                      "type": "integer"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "url": {
-                            "type": "string"
-                          },
-                          "b64_json": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "created",
-                    "data"
-                  ]
+                  "$ref": "#/components/schemas/ImagesResponse"
                 }
               }
             }
@@ -689,62 +320,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "model": {
-                    "description": "ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them.",
-                    "type": "string"
-                  },
-                  "input": {
-                    "description": "Input text to get embeddings for, encoded as a string or array of tokens. To get embeddings for multiple inputs in a single request, pass an array of strings or array of token arrays. Each input must not exceed 8192 tokens in length.\n",
-                    "example": "The quick brown fox jumped over the lazy dog",
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "default": "",
-                        "example": "This is a test."
-                      },
-                      {
-                        "type": "array",
-                        "items": {
-                          "type": "string",
-                          "default": "",
-                          "example": "This is a test."
-                        }
-                      },
-                      {
-                        "type": "array",
-                        "minItems": 1,
-                        "items": {
-                          "type": "integer"
-                        },
-                        "example": "[1212, 318, 257, 1332, 13]"
-                      },
-                      {
-                        "type": "array",
-                        "minItems": 1,
-                        "items": {
-                          "type": "array",
-                          "minItems": 1,
-                          "items": {
-                            "type": "integer"
-                          }
-                        },
-                        "example": "[[1212, 318, 257, 1332, 13]]"
-                      }
-                    ]
-                  },
-                  "user": {
-                    "type": "string",
-                    "example": "user-1234",
-                    "description": "A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).\n"
-                  }
-                },
-                "required": [
-                  "model",
-                  "input"
-                ]
+                "$ref": "#/components/schemas/CreateEmbeddingRequest"
               }
             }
           }
@@ -755,61 +331,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "object": {
-                      "type": "string"
-                    },
-                    "model": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "index": {
-                            "type": "integer"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "embedding": {
-                            "type": "array",
-                            "items": {
-                              "type": "number"
-                            }
-                          }
-                        },
-                        "required": [
-                          "index",
-                          "object",
-                          "embedding"
-                        ]
-                      }
-                    },
-                    "usage": {
-                      "type": "object",
-                      "properties": {
-                        "prompt_tokens": {
-                          "type": "integer"
-                        },
-                        "total_tokens": {
-                          "type": "integer"
-                        }
-                      },
-                      "required": [
-                        "prompt_tokens",
-                        "total_tokens"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "object",
-                    "model",
-                    "data",
-                    "usage"
-                  ]
+                  "$ref": "#/components/schemas/CreateEmbeddingResponse"
                 }
               }
             }
@@ -854,52 +376,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "query": {
-                    "description": "Query to search against the documents.",
-                    "type": "string",
-                    "example": "the president",
-                    "minLength": 1
-                  },
-                  "documents": {
-                    "description": "Up to 200 documents to search over, provided as a list of strings.\n\nThe maximum document length (in tokens) is 2034 minus the number of tokens in the query.\n\nYou should specify either `documents` or a `file`, but not both.\n",
-                    "type": "array",
-                    "minItems": 1,
-                    "maxItems": 200,
-                    "items": {
-                      "type": "string"
-                    },
-                    "nullable": true,
-                    "example": "['White House', 'hospital', 'school']"
-                  },
-                  "file": {
-                    "description": "The ID of an uploaded file that contains documents to search over.\n\nYou should specify either `documents` or a `file`, but not both.\n",
-                    "type": "string",
-                    "nullable": true
-                  },
-                  "max_rerank": {
-                    "description": "The maximum number of documents to be re-ranked and returned by search.\n\nThis flag only takes effect when `file` is set.\n",
-                    "type": "integer",
-                    "minimum": 1,
-                    "default": 200,
-                    "nullable": true
-                  },
-                  "return_metadata": {
-                    "description": "A special boolean flag for showing metadata. If set to `true`, each document entry in the returned JSON will contain a \"metadata\" field.\n\nThis flag only takes effect when `file` is set.\n",
-                    "type": "boolean",
-                    "default": false,
-                    "nullable": true
-                  },
-                  "user": {
-                    "type": "string",
-                    "example": "user-1234",
-                    "description": "A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).\n"
-                  }
-                },
-                "required": [
-                  "query"
-                ]
+                "$ref": "#/components/schemas/CreateSearchRequest"
               }
             }
           }
@@ -910,32 +387,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "object": {
-                      "type": "string"
-                    },
-                    "model": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "object": {
-                            "type": "string"
-                          },
-                          "document": {
-                            "type": "integer"
-                          },
-                          "score": {
-                            "type": "number"
-                          }
-                        }
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/CreateSearchResponse"
                 }
               }
             }
@@ -968,57 +420,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "object": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "title": "OpenAIFile",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "bytes": {
-                            "type": "integer"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "filename": {
-                            "type": "string"
-                          },
-                          "purpose": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "status_details": {
-                            "type": "object",
-                            "nullable": true
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "object",
-                          "bytes",
-                          "created_at",
-                          "filename",
-                          "purpose"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "object",
-                    "data"
-                  ]
+                  "$ref": "#/components/schemas/ListFilesResponse"
                 }
               }
             }
@@ -1047,23 +449,7 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "file": {
-                    "description": "Name of the [JSON Lines](https://jsonlines.readthedocs.io/en/latest/) file to be uploaded.\n\nIf the `purpose` is set to \"fine-tune\", each line is a JSON record with \"prompt\" and \"completion\" fields representing your [training examples](/docs/guides/fine-tuning/prepare-training-data).\n",
-                    "type": "string",
-                    "format": "binary"
-                  },
-                  "purpose": {
-                    "description": "The intended purpose of the uploaded documents.\n\nUse \"fine-tune\" for [Fine-tuning](/docs/api-reference/fine-tunes). This allows us to validate the format of the uploaded file.\n",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "file",
-                  "purpose"
-                ]
+                "$ref": "#/components/schemas/CreateFileRequest"
               }
             }
           }
@@ -1074,42 +460,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "OpenAIFile",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "object": {
-                      "type": "string"
-                    },
-                    "bytes": {
-                      "type": "integer"
-                    },
-                    "created_at": {
-                      "type": "integer"
-                    },
-                    "filename": {
-                      "type": "string"
-                    },
-                    "purpose": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string"
-                    },
-                    "status_details": {
-                      "type": "object",
-                      "nullable": true
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "object",
-                    "bytes",
-                    "created_at",
-                    "filename",
-                    "purpose"
-                  ]
+                  "$ref": "#/components/schemas/OpenAIFile"
                 }
               }
             }
@@ -1152,23 +503,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "object": {
-                      "type": "string"
-                    },
-                    "deleted": {
-                      "type": "boolean"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "object",
-                    "deleted"
-                  ]
+                  "$ref": "#/components/schemas/DeleteFileResponse"
                 }
               }
             }
@@ -1209,42 +544,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "OpenAIFile",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "object": {
-                      "type": "string"
-                    },
-                    "bytes": {
-                      "type": "integer"
-                    },
-                    "created_at": {
-                      "type": "integer"
-                    },
-                    "filename": {
-                      "type": "string"
-                    },
-                    "purpose": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string"
-                    },
-                    "status_details": {
-                      "type": "object",
-                      "nullable": true
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "object",
-                    "bytes",
-                    "created_at",
-                    "filename",
-                    "purpose"
-                  ]
+                  "$ref": "#/components/schemas/OpenAIFile"
                 }
               }
             }
@@ -1318,154 +618,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "model": {
-                    "description": "ID of the model to use for completion. You can select one of `ada`, `babbage`, `curie`, or `davinci`.",
-                    "type": "string"
-                  },
-                  "question": {
-                    "description": "Question to get answered.",
-                    "type": "string",
-                    "minLength": 1,
-                    "example": "What is the capital of Japan?"
-                  },
-                  "examples": {
-                    "description": "List of (question, answer) pairs that will help steer the model towards the tone and answer format you'd like. We recommend adding 2 to 3 examples.",
-                    "type": "array",
-                    "minItems": 1,
-                    "maxItems": 200,
-                    "items": {
-                      "type": "array",
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "items": {
-                        "type": "string",
-                        "minLength": 1
-                      }
-                    },
-                    "example": "[['What is the capital of Canada?', 'Ottawa'], ['Which province is Ottawa in?', 'Ontario']]"
-                  },
-                  "examples_context": {
-                    "description": "A text snippet containing the contextual information used to generate the answers for the `examples` you provide.",
-                    "type": "string",
-                    "example": "Ottawa, Canada's capital, is located in the east of southern Ontario, near the city of Montréal and the U.S. border."
-                  },
-                  "documents": {
-                    "description": "List of documents from which the answer for the input `question` should be derived. If this is an empty list, the question will be answered based on the question-answer examples.\n\nYou should specify either `documents` or a `file`, but not both.\n",
-                    "type": "array",
-                    "maxItems": 200,
-                    "items": {
-                      "type": "string"
-                    },
-                    "example": "['Japan is an island country in East Asia, located in the northwest Pacific Ocean.', 'Tokyo is the capital and most populous prefecture of Japan.']",
-                    "nullable": true
-                  },
-                  "file": {
-                    "description": "The ID of an uploaded file that contains documents to search over. See [upload file](/docs/api-reference/files/upload) for how to upload a file of the desired format and purpose.\n\nYou should specify either `documents` or a `file`, but not both.\n",
-                    "type": "string",
-                    "nullable": true
-                  },
-                  "search_model": {
-                    "description": "ID of the model to use for [Search](/docs/api-reference/searches/create). You can select one of `ada`, `babbage`, `curie`, or `davinci`.",
-                    "type": "string",
-                    "default": "ada",
-                    "nullable": true
-                  },
-                  "max_rerank": {
-                    "description": "The maximum number of documents to be ranked by [Search](/docs/api-reference/searches/create) when using `file`. Setting it to a higher value leads to improved accuracy but with increased latency and cost.",
-                    "type": "integer",
-                    "default": 200,
-                    "nullable": true
-                  },
-                  "temperature": {
-                    "description": "What [sampling temperature](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277) to use. Higher values mean the model will take more risks and value 0 (argmax sampling) works better for scenarios with a well-defined answer.",
-                    "type": "number",
-                    "default": 0,
-                    "nullable": true
-                  },
-                  "logprobs": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 5,
-                    "default": null,
-                    "nullable": true,
-                    "description": "Include the log probabilities on the `logprobs` most likely tokens, as well the chosen tokens. For example, if `logprobs` is 5, the API will return a list of the 5 most likely tokens. The API will always return the `logprob` of the sampled token, so there may be up to `logprobs+1` elements in the response.\n\nThe maximum value for `logprobs` is 5. If you need more than this, please contact us through our [Help center](https://help.openai.com) and describe your use case.\n\nWhen `logprobs` is set, `completion` will be automatically added into `expand` to get the logprobs.\n"
-                  },
-                  "max_tokens": {
-                    "description": "The maximum number of tokens allowed for the generated answer",
-                    "type": "integer",
-                    "default": 16,
-                    "nullable": true
-                  },
-                  "stop": {
-                    "description": "Up to 4 sequences where the API will stop generating further tokens. The returned text will not contain the stop sequence.\n",
-                    "default": null,
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "default": "<|endoftext|>",
-                        "example": "\n"
-                      },
-                      {
-                        "type": "array",
-                        "minItems": 1,
-                        "maxItems": 4,
-                        "items": {
-                          "type": "string",
-                          "example": "[\"\\n\"]"
-                        }
-                      }
-                    ],
-                    "nullable": true
-                  },
-                  "n": {
-                    "description": "How many answers to generate for each question.",
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 10,
-                    "default": 1,
-                    "nullable": true
-                  },
-                  "logit_bias": {
-                    "type": "object",
-                    "x-oaiTypeLabel": "map",
-                    "default": null,
-                    "nullable": true,
-                    "description": "Modify the likelihood of specified tokens appearing in the completion.\n\nAccepts a json object that maps tokens (specified by their token ID in the GPT tokenizer) to an associated bias value from -100 to 100. You can use this [tokenizer tool](/tokenizer?view=bpe) (which works for both GPT-2 and GPT-3) to convert text to token IDs. Mathematically, the bias is added to the logits generated by the model prior to sampling. The exact effect will vary per model, but values between -1 and 1 should decrease or increase likelihood of selection; values like -100 or 100 should result in a ban or exclusive selection of the relevant token.\n\nAs an example, you can pass `{\"50256\": -100}` to prevent the <|endoftext|> token from being generated.\n"
-                  },
-                  "return_metadata": {
-                    "description": "A special boolean flag for showing metadata. If set to `true`, each document entry in the returned JSON will contain a \"metadata\" field.\n\nThis flag only takes effect when `file` is set.\n",
-                    "type": "boolean",
-                    "default": false,
-                    "nullable": true
-                  },
-                  "return_prompt": {
-                    "description": "If set to `true`, the returned JSON will include a \"prompt\" field containing the final prompt that was used to request a completion. This is mainly useful for debugging purposes.",
-                    "type": "boolean",
-                    "default": false,
-                    "nullable": true
-                  },
-                  "expand": {
-                    "description": "If an object name is in the list, we provide the full information of the object; otherwise, we only provide the object ID. Currently we support `completion` and `file` objects for expansion.",
-                    "type": "array",
-                    "items": {},
-                    "nullable": true,
-                    "default": []
-                  },
-                  "user": {
-                    "type": "string",
-                    "example": "user-1234",
-                    "description": "A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).\n"
-                  }
-                },
-                "required": [
-                  "model",
-                  "question",
-                  "examples",
-                  "examples_context"
-                ]
+                "$ref": "#/components/schemas/CreateAnswerRequest"
               }
             }
           }
@@ -1476,41 +629,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "object": {
-                      "type": "string"
-                    },
-                    "model": {
-                      "type": "string"
-                    },
-                    "search_model": {
-                      "type": "string"
-                    },
-                    "completion": {
-                      "type": "string"
-                    },
-                    "answers": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "selected_documents": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "document": {
-                            "type": "integer"
-                          },
-                          "text": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/CreateAnswerResponse"
                 }
               }
             }
@@ -1543,121 +662,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "model": {
-                    "description": "ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them.",
-                    "type": "string"
-                  },
-                  "query": {
-                    "description": "Query to be classified.",
-                    "type": "string",
-                    "minLength": 1,
-                    "example": "The plot is not very attractive."
-                  },
-                  "examples": {
-                    "description": "A list of examples with labels, in the following format:\n\n`[[\"The movie is so interesting.\", \"Positive\"], [\"It is quite boring.\", \"Negative\"], ...]`\n\nAll the label strings will be normalized to be capitalized.\n\nYou should specify either `examples` or `file`, but not both.\n",
-                    "type": "array",
-                    "minItems": 2,
-                    "maxItems": 200,
-                    "items": {
-                      "type": "array",
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "items": {
-                        "type": "string",
-                        "minLength": 1
-                      }
-                    },
-                    "example": "[['Do not see this film.', 'Negative'], ['Smart, provocative and blisteringly funny.', 'Positive']]",
-                    "nullable": true
-                  },
-                  "file": {
-                    "description": "The ID of the uploaded file that contains training examples. See [upload file](/docs/api-reference/files/upload) for how to upload a file of the desired format and purpose.\n\nYou should specify either `examples` or `file`, but not both.\n",
-                    "type": "string",
-                    "nullable": true
-                  },
-                  "labels": {
-                    "description": "The set of categories being classified. If not specified, candidate labels will be automatically collected from the examples you provide. All the label strings will be normalized to be capitalized.",
-                    "type": "array",
-                    "minItems": 2,
-                    "maxItems": 200,
-                    "default": null,
-                    "items": {
-                      "type": "string"
-                    },
-                    "example": [
-                      "Positive",
-                      "Negative"
-                    ],
-                    "nullable": true
-                  },
-                  "search_model": {
-                    "description": "ID of the model to use for [Search](/docs/api-reference/searches/create). You can select one of `ada`, `babbage`, `curie`, or `davinci`.",
-                    "type": "string",
-                    "default": "ada",
-                    "nullable": true
-                  },
-                  "temperature": {
-                    "description": "What sampling `temperature` to use. Higher values mean the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.",
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 2,
-                    "default": 0,
-                    "nullable": true,
-                    "example": 0
-                  },
-                  "logprobs": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 5,
-                    "default": null,
-                    "nullable": true,
-                    "description": "Include the log probabilities on the `logprobs` most likely tokens, as well the chosen tokens. For example, if `logprobs` is 5, the API will return a list of the 5 most likely tokens. The API will always return the `logprob` of the sampled token, so there may be up to `logprobs+1` elements in the response.\n\nThe maximum value for `logprobs` is 5. If you need more than this, please contact us through our [Help center](https://help.openai.com) and describe your use case.\n\nWhen `logprobs` is set, `completion` will be automatically added into `expand` to get the logprobs.\n"
-                  },
-                  "max_examples": {
-                    "description": "The maximum number of examples to be ranked by [Search](/docs/api-reference/searches/create) when using `file`. Setting it to a higher value leads to improved accuracy but with increased latency and cost.",
-                    "type": "integer",
-                    "default": 200,
-                    "nullable": true
-                  },
-                  "logit_bias": {
-                    "type": "object",
-                    "x-oaiTypeLabel": "map",
-                    "default": null,
-                    "nullable": true,
-                    "description": "Modify the likelihood of specified tokens appearing in the completion.\n\nAccepts a json object that maps tokens (specified by their token ID in the GPT tokenizer) to an associated bias value from -100 to 100. You can use this [tokenizer tool](/tokenizer?view=bpe) (which works for both GPT-2 and GPT-3) to convert text to token IDs. Mathematically, the bias is added to the logits generated by the model prior to sampling. The exact effect will vary per model, but values between -1 and 1 should decrease or increase likelihood of selection; values like -100 or 100 should result in a ban or exclusive selection of the relevant token.\n\nAs an example, you can pass `{\"50256\": -100}` to prevent the <|endoftext|> token from being generated.\n"
-                  },
-                  "return_prompt": {
-                    "description": "If set to `true`, the returned JSON will include a \"prompt\" field containing the final prompt that was used to request a completion. This is mainly useful for debugging purposes.",
-                    "type": "boolean",
-                    "default": false,
-                    "nullable": true
-                  },
-                  "return_metadata": {
-                    "description": "A special boolean flag for showing metadata. If set to `true`, each document entry in the returned JSON will contain a \"metadata\" field.\n\nThis flag only takes effect when `file` is set.\n",
-                    "type": "boolean",
-                    "default": false,
-                    "nullable": true
-                  },
-                  "expand": {
-                    "description": "If an object name is in the list, we provide the full information of the object; otherwise, we only provide the object ID. Currently we support `completion` and `file` objects for expansion.",
-                    "type": "array",
-                    "items": {},
-                    "nullable": true,
-                    "default": []
-                  },
-                  "user": {
-                    "type": "string",
-                    "example": "user-1234",
-                    "description": "A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).\n"
-                  }
-                },
-                "required": [
-                  "model",
-                  "query"
-                ]
+                "$ref": "#/components/schemas/CreateClassificationRequest"
               }
             }
           }
@@ -1668,41 +673,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "object": {
-                      "type": "string"
-                    },
-                    "model": {
-                      "type": "string"
-                    },
-                    "search_model": {
-                      "type": "string"
-                    },
-                    "completion": {
-                      "type": "string"
-                    },
-                    "label": {
-                      "type": "string"
-                    },
-                    "selected_examples": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "document": {
-                            "type": "integer"
-                          },
-                          "text": {
-                            "type": "string"
-                          },
-                          "label": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/CreateClassificationResponse"
                 }
               }
             }
@@ -1734,94 +705,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "training_file": {
-                    "description": "The ID of an uploaded file that contains training data.\n\nSee [upload file](/docs/api-reference/files/upload) for how to upload a file.\n\nYour dataset must be formatted as a JSONL file, where each training\nexample is a JSON object with the keys \"prompt\" and \"completion\".\nAdditionally, you must upload your file with the purpose `fine-tune`.\n\nSee the [fine-tuning guide](/docs/guides/fine-tuning/creating-training-data) for more details.\n",
-                    "type": "string",
-                    "example": "file-ajSREls59WBbvgSzJSVWxMCB"
-                  },
-                  "validation_file": {
-                    "description": "The ID of an uploaded file that contains validation data.\n\nIf you provide this file, the data is used to generate validation\nmetrics periodically during fine-tuning. These metrics can be viewed in\nthe [fine-tuning results file](/docs/guides/fine-tuning/analyzing-your-fine-tuned-model).\nYour train and validation data should be mutually exclusive.\n\nYour dataset must be formatted as a JSONL file, where each validation\nexample is a JSON object with the keys \"prompt\" and \"completion\".\nAdditionally, you must upload your file with the purpose `fine-tune`.\n\nSee the [fine-tuning guide](/docs/guides/fine-tuning/creating-training-data) for more details.\n",
-                    "type": "string",
-                    "nullable": true,
-                    "example": "file-XjSREls59WBbvgSzJSVWxMCa"
-                  },
-                  "model": {
-                    "description": "The name of the base model to fine-tune. You can select one of \"ada\",\n\"babbage\", \"curie\", \"davinci\", or a fine-tuned model created after 2022-04-21.\nTo learn more about these models, see the\n[Models](https://beta.openai.com/docs/models) documentation.\n",
-                    "default": "curie",
-                    "type": "string",
-                    "nullable": true
-                  },
-                  "n_epochs": {
-                    "description": "The number of epochs to train the model for. An epoch refers to one\nfull cycle through the training dataset.\n",
-                    "default": 4,
-                    "type": "integer",
-                    "nullable": true
-                  },
-                  "batch_size": {
-                    "description": "The batch size to use for training. The batch size is the number of\ntraining examples used to train a single forward and backward pass.\n\nBy default, the batch size will be dynamically configured to be\n~0.2% of the number of examples in the training set, capped at 256 -\nin general, we've found that larger batch sizes tend to work better\nfor larger datasets.\n",
-                    "default": null,
-                    "type": "integer",
-                    "nullable": true
-                  },
-                  "learning_rate_multiplier": {
-                    "description": "The learning rate multiplier to use for training.\nThe fine-tuning learning rate is the original learning rate used for\npretraining multiplied by this value.\n\nBy default, the learning rate multiplier is the 0.05, 0.1, or 0.2\ndepending on final `batch_size` (larger learning rates tend to\nperform better with larger batch sizes). We recommend experimenting\nwith values in the range 0.02 to 0.2 to see what produces the best\nresults.\n",
-                    "default": null,
-                    "type": "number",
-                    "nullable": true
-                  },
-                  "prompt_loss_weight": {
-                    "description": "The weight to use for loss on the prompt tokens. This controls how\nmuch the model tries to learn to generate the prompt (as compared\nto the completion which always has a weight of 1.0), and can add\na stabilizing effect to training when completions are short.\n\nIf prompts are extremely long (relative to completions), it may make\nsense to reduce this weight so as to avoid over-prioritizing\nlearning the prompt.\n",
-                    "default": 0.01,
-                    "type": "number",
-                    "nullable": true
-                  },
-                  "compute_classification_metrics": {
-                    "description": "If set, we calculate classification-specific metrics such as accuracy\nand F-1 score using the validation set at the end of every epoch.\nThese metrics can be viewed in the [results file](/docs/guides/fine-tuning/analyzing-your-fine-tuned-model).\n\nIn order to compute classification metrics, you must provide a\n`validation_file`. Additionally, you must\nspecify `classification_n_classes` for multiclass classification or\n`classification_positive_class` for binary classification.\n",
-                    "type": "boolean",
-                    "default": false,
-                    "nullable": true
-                  },
-                  "classification_n_classes": {
-                    "description": "The number of classes in a classification task.\n\nThis parameter is required for multiclass classification.\n",
-                    "type": "integer",
-                    "default": null,
-                    "nullable": true
-                  },
-                  "classification_positive_class": {
-                    "description": "The positive class in binary classification.\n\nThis parameter is needed to generate precision, recall, and F1\nmetrics when doing binary classification.\n",
-                    "type": "string",
-                    "default": null,
-                    "nullable": true
-                  },
-                  "classification_betas": {
-                    "description": "If this is provided, we calculate F-beta scores at the specified\nbeta values. The F-beta score is a generalization of F-1 score.\nThis is only used for binary classification.\n\nWith a beta of 1 (i.e. the F-1 score), precision and recall are\ngiven the same weight. A larger beta score puts more weight on\nrecall and less on precision. A smaller beta score puts more weight\non precision and less on recall.\n",
-                    "type": "array",
-                    "items": {
-                      "type": "number"
-                    },
-                    "example": [
-                      0.6,
-                      1,
-                      1.5,
-                      2
-                    ],
-                    "default": null,
-                    "nullable": true
-                  },
-                  "suffix": {
-                    "description": "A string of up to 40 characters that will be added to your fine-tuned model name.\n\nFor example, a `suffix` of \"custom-model-name\" would produce a model name like `ada:ft-your-org:custom-model-name-2022-02-15-04-21-04`.\n",
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 40,
-                    "default": null,
-                    "nullable": true
-                  }
-                },
-                "required": [
-                  "training_file"
-                ]
+                "$ref": "#/components/schemas/CreateFineTuneRequest"
               }
             }
           }
@@ -1832,200 +716,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "FineTune",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "object": {
-                      "type": "string"
-                    },
-                    "created_at": {
-                      "type": "integer"
-                    },
-                    "updated_at": {
-                      "type": "integer"
-                    },
-                    "model": {
-                      "type": "string"
-                    },
-                    "fine_tuned_model": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "organization_id": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string"
-                    },
-                    "hyperparams": {
-                      "type": "object"
-                    },
-                    "training_files": {
-                      "type": "array",
-                      "items": {
-                        "title": "OpenAIFile",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "bytes": {
-                            "type": "integer"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "filename": {
-                            "type": "string"
-                          },
-                          "purpose": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "status_details": {
-                            "type": "object",
-                            "nullable": true
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "object",
-                          "bytes",
-                          "created_at",
-                          "filename",
-                          "purpose"
-                        ]
-                      }
-                    },
-                    "validation_files": {
-                      "type": "array",
-                      "items": {
-                        "title": "OpenAIFile",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "bytes": {
-                            "type": "integer"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "filename": {
-                            "type": "string"
-                          },
-                          "purpose": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "status_details": {
-                            "type": "object",
-                            "nullable": true
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "object",
-                          "bytes",
-                          "created_at",
-                          "filename",
-                          "purpose"
-                        ]
-                      }
-                    },
-                    "result_files": {
-                      "type": "array",
-                      "items": {
-                        "title": "OpenAIFile",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "bytes": {
-                            "type": "integer"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "filename": {
-                            "type": "string"
-                          },
-                          "purpose": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "status_details": {
-                            "type": "object",
-                            "nullable": true
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "object",
-                          "bytes",
-                          "created_at",
-                          "filename",
-                          "purpose"
-                        ]
-                      }
-                    },
-                    "events": {
-                      "type": "array",
-                      "items": {
-                        "title": "FineTuneEvent",
-                        "properties": {
-                          "object": {
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "level": {
-                            "type": "string"
-                          },
-                          "message": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "object",
-                          "created_at",
-                          "level",
-                          "message"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "object",
-                    "created_at",
-                    "updated_at",
-                    "model",
-                    "fine_tuned_model",
-                    "organization_id",
-                    "status",
-                    "hyperparams",
-                    "training_files",
-                    "validation_files",
-                    "result_files"
-                  ]
+                  "$ref": "#/components/schemas/FineTune"
                 }
               }
             }
@@ -2056,215 +747,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "object": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "title": "FineTune",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "updated_at": {
-                            "type": "integer"
-                          },
-                          "model": {
-                            "type": "string"
-                          },
-                          "fine_tuned_model": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "organization_id": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "hyperparams": {
-                            "type": "object"
-                          },
-                          "training_files": {
-                            "type": "array",
-                            "items": {
-                              "title": "OpenAIFile",
-                              "properties": {
-                                "id": {
-                                  "type": "string"
-                                },
-                                "object": {
-                                  "type": "string"
-                                },
-                                "bytes": {
-                                  "type": "integer"
-                                },
-                                "created_at": {
-                                  "type": "integer"
-                                },
-                                "filename": {
-                                  "type": "string"
-                                },
-                                "purpose": {
-                                  "type": "string"
-                                },
-                                "status": {
-                                  "type": "string"
-                                },
-                                "status_details": {
-                                  "type": "object",
-                                  "nullable": true
-                                }
-                              },
-                              "required": [
-                                "id",
-                                "object",
-                                "bytes",
-                                "created_at",
-                                "filename",
-                                "purpose"
-                              ]
-                            }
-                          },
-                          "validation_files": {
-                            "type": "array",
-                            "items": {
-                              "title": "OpenAIFile",
-                              "properties": {
-                                "id": {
-                                  "type": "string"
-                                },
-                                "object": {
-                                  "type": "string"
-                                },
-                                "bytes": {
-                                  "type": "integer"
-                                },
-                                "created_at": {
-                                  "type": "integer"
-                                },
-                                "filename": {
-                                  "type": "string"
-                                },
-                                "purpose": {
-                                  "type": "string"
-                                },
-                                "status": {
-                                  "type": "string"
-                                },
-                                "status_details": {
-                                  "type": "object",
-                                  "nullable": true
-                                }
-                              },
-                              "required": [
-                                "id",
-                                "object",
-                                "bytes",
-                                "created_at",
-                                "filename",
-                                "purpose"
-                              ]
-                            }
-                          },
-                          "result_files": {
-                            "type": "array",
-                            "items": {
-                              "title": "OpenAIFile",
-                              "properties": {
-                                "id": {
-                                  "type": "string"
-                                },
-                                "object": {
-                                  "type": "string"
-                                },
-                                "bytes": {
-                                  "type": "integer"
-                                },
-                                "created_at": {
-                                  "type": "integer"
-                                },
-                                "filename": {
-                                  "type": "string"
-                                },
-                                "purpose": {
-                                  "type": "string"
-                                },
-                                "status": {
-                                  "type": "string"
-                                },
-                                "status_details": {
-                                  "type": "object",
-                                  "nullable": true
-                                }
-                              },
-                              "required": [
-                                "id",
-                                "object",
-                                "bytes",
-                                "created_at",
-                                "filename",
-                                "purpose"
-                              ]
-                            }
-                          },
-                          "events": {
-                            "type": "array",
-                            "items": {
-                              "title": "FineTuneEvent",
-                              "properties": {
-                                "object": {
-                                  "type": "string"
-                                },
-                                "created_at": {
-                                  "type": "integer"
-                                },
-                                "level": {
-                                  "type": "string"
-                                },
-                                "message": {
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "object",
-                                "created_at",
-                                "level",
-                                "message"
-                              ]
-                            }
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "object",
-                          "created_at",
-                          "updated_at",
-                          "model",
-                          "fine_tuned_model",
-                          "organization_id",
-                          "status",
-                          "hyperparams",
-                          "training_files",
-                          "validation_files",
-                          "result_files"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "object",
-                    "data"
-                  ]
+                  "$ref": "#/components/schemas/ListFineTunesResponse"
                 }
               }
             }
@@ -2309,200 +792,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "FineTune",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "object": {
-                      "type": "string"
-                    },
-                    "created_at": {
-                      "type": "integer"
-                    },
-                    "updated_at": {
-                      "type": "integer"
-                    },
-                    "model": {
-                      "type": "string"
-                    },
-                    "fine_tuned_model": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "organization_id": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string"
-                    },
-                    "hyperparams": {
-                      "type": "object"
-                    },
-                    "training_files": {
-                      "type": "array",
-                      "items": {
-                        "title": "OpenAIFile",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "bytes": {
-                            "type": "integer"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "filename": {
-                            "type": "string"
-                          },
-                          "purpose": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "status_details": {
-                            "type": "object",
-                            "nullable": true
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "object",
-                          "bytes",
-                          "created_at",
-                          "filename",
-                          "purpose"
-                        ]
-                      }
-                    },
-                    "validation_files": {
-                      "type": "array",
-                      "items": {
-                        "title": "OpenAIFile",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "bytes": {
-                            "type": "integer"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "filename": {
-                            "type": "string"
-                          },
-                          "purpose": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "status_details": {
-                            "type": "object",
-                            "nullable": true
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "object",
-                          "bytes",
-                          "created_at",
-                          "filename",
-                          "purpose"
-                        ]
-                      }
-                    },
-                    "result_files": {
-                      "type": "array",
-                      "items": {
-                        "title": "OpenAIFile",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "bytes": {
-                            "type": "integer"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "filename": {
-                            "type": "string"
-                          },
-                          "purpose": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "status_details": {
-                            "type": "object",
-                            "nullable": true
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "object",
-                          "bytes",
-                          "created_at",
-                          "filename",
-                          "purpose"
-                        ]
-                      }
-                    },
-                    "events": {
-                      "type": "array",
-                      "items": {
-                        "title": "FineTuneEvent",
-                        "properties": {
-                          "object": {
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "level": {
-                            "type": "string"
-                          },
-                          "message": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "object",
-                          "created_at",
-                          "level",
-                          "message"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "object",
-                    "created_at",
-                    "updated_at",
-                    "model",
-                    "fine_tuned_model",
-                    "organization_id",
-                    "status",
-                    "hyperparams",
-                    "training_files",
-                    "validation_files",
-                    "result_files"
-                  ]
+                  "$ref": "#/components/schemas/FineTune"
                 }
               }
             }
@@ -2547,200 +837,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "FineTune",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "object": {
-                      "type": "string"
-                    },
-                    "created_at": {
-                      "type": "integer"
-                    },
-                    "updated_at": {
-                      "type": "integer"
-                    },
-                    "model": {
-                      "type": "string"
-                    },
-                    "fine_tuned_model": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "organization_id": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string"
-                    },
-                    "hyperparams": {
-                      "type": "object"
-                    },
-                    "training_files": {
-                      "type": "array",
-                      "items": {
-                        "title": "OpenAIFile",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "bytes": {
-                            "type": "integer"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "filename": {
-                            "type": "string"
-                          },
-                          "purpose": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "status_details": {
-                            "type": "object",
-                            "nullable": true
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "object",
-                          "bytes",
-                          "created_at",
-                          "filename",
-                          "purpose"
-                        ]
-                      }
-                    },
-                    "validation_files": {
-                      "type": "array",
-                      "items": {
-                        "title": "OpenAIFile",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "bytes": {
-                            "type": "integer"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "filename": {
-                            "type": "string"
-                          },
-                          "purpose": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "status_details": {
-                            "type": "object",
-                            "nullable": true
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "object",
-                          "bytes",
-                          "created_at",
-                          "filename",
-                          "purpose"
-                        ]
-                      }
-                    },
-                    "result_files": {
-                      "type": "array",
-                      "items": {
-                        "title": "OpenAIFile",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "bytes": {
-                            "type": "integer"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "filename": {
-                            "type": "string"
-                          },
-                          "purpose": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "status_details": {
-                            "type": "object",
-                            "nullable": true
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "object",
-                          "bytes",
-                          "created_at",
-                          "filename",
-                          "purpose"
-                        ]
-                      }
-                    },
-                    "events": {
-                      "type": "array",
-                      "items": {
-                        "title": "FineTuneEvent",
-                        "properties": {
-                          "object": {
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "level": {
-                            "type": "string"
-                          },
-                          "message": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "object",
-                          "created_at",
-                          "level",
-                          "message"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "object",
-                    "created_at",
-                    "updated_at",
-                    "model",
-                    "fine_tuned_model",
-                    "organization_id",
-                    "status",
-                    "hyperparams",
-                    "training_files",
-                    "validation_files",
-                    "result_files"
-                  ]
+                  "$ref": "#/components/schemas/FineTune"
                 }
               }
             }
@@ -2795,42 +892,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "object": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "title": "FineTuneEvent",
-                        "properties": {
-                          "object": {
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "integer"
-                          },
-                          "level": {
-                            "type": "string"
-                          },
-                          "message": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "object",
-                          "created_at",
-                          "level",
-                          "message"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "object",
-                    "data"
-                  ]
+                  "$ref": "#/components/schemas/ListFineTuneEventsResponse"
                 }
               }
             }
@@ -2863,42 +925,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "object": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "title": "Model",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "object": {
-                            "type": "string"
-                          },
-                          "created": {
-                            "type": "integer"
-                          },
-                          "owned_by": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "object",
-                          "created",
-                          "owned_by"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "object",
-                    "data"
-                  ]
+                  "$ref": "#/components/schemas/ListModelsResponse"
                 }
               }
             }
@@ -2942,27 +969,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Model",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "object": {
-                      "type": "string"
-                    },
-                    "created": {
-                      "type": "integer"
-                    },
-                    "owned_by": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "object",
-                    "created",
-                    "owned_by"
-                  ]
+                  "$ref": "#/components/schemas/Model"
                 }
               }
             }
@@ -3004,23 +1011,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "object": {
-                      "type": "string"
-                    },
-                    "deleted": {
-                      "type": "boolean"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "object",
-                    "deleted"
-                  ]
+                  "$ref": "#/components/schemas/DeleteModelResponse"
                 }
               }
             }
@@ -3052,37 +1043,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "input": {
-                    "description": "The input text to classify",
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "default": "",
-                        "example": "I want to kill them."
-                      },
-                      {
-                        "type": "array",
-                        "items": {
-                          "type": "string",
-                          "default": "",
-                          "example": "I want to kill them."
-                        }
-                      }
-                    ]
-                  },
-                  "model": {
-                    "description": "Two content moderations models are available: `text-moderation-stable` and `text-moderation-latest`.\n\nThe default is `text-moderation-latest` which will be automatically upgraded over time. This ensures you are always using our most accurate model. If you use `text-moderation-stable`, we will provide advanced notice before updating the model. Accuracy of `text-moderation-stable` may be slightly lower than for `text-moderation-latest`.\n",
-                    "type": "string",
-                    "nullable": false,
-                    "default": "text-moderation-latest",
-                    "example": "text-moderation-stable"
-                  }
-                },
-                "required": [
-                  "input"
-                ]
+                "$ref": "#/components/schemas/CreateModerationRequest"
               }
             }
           }
@@ -3093,106 +1054,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "model": {
-                      "type": "string"
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "flagged": {
-                            "type": "boolean"
-                          },
-                          "categories": {
-                            "type": "object",
-                            "properties": {
-                              "hate": {
-                                "type": "boolean"
-                              },
-                              "hate/threatening": {
-                                "type": "boolean"
-                              },
-                              "self-harm": {
-                                "type": "boolean"
-                              },
-                              "sexual": {
-                                "type": "boolean"
-                              },
-                              "sexual/minors": {
-                                "type": "boolean"
-                              },
-                              "violence": {
-                                "type": "boolean"
-                              },
-                              "violence/graphic": {
-                                "type": "boolean"
-                              }
-                            },
-                            "required": [
-                              "hate",
-                              "hate/threatening",
-                              "self-harm",
-                              "sexual",
-                              "sexual/minors",
-                              "violence",
-                              "violence/graphic"
-                            ]
-                          },
-                          "category_scores": {
-                            "type": "object",
-                            "properties": {
-                              "hate": {
-                                "type": "number"
-                              },
-                              "hate/threatening": {
-                                "type": "number"
-                              },
-                              "self-harm": {
-                                "type": "number"
-                              },
-                              "sexual": {
-                                "type": "number"
-                              },
-                              "sexual/minors": {
-                                "type": "number"
-                              },
-                              "violence": {
-                                "type": "number"
-                              },
-                              "violence/graphic": {
-                                "type": "number"
-                              }
-                            },
-                            "required": [
-                              "hate",
-                              "hate/threatening",
-                              "self-harm",
-                              "sexual",
-                              "sexual/minors",
-                              "violence",
-                              "violence/graphic"
-                            ]
-                          }
-                        },
-                        "required": [
-                          "flagged",
-                          "categories",
-                          "category_scores"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "model",
-                    "results"
-                  ]
+                  "$ref": "#/components/schemas/CreateModerationResponse"
                 }
               }
             }
@@ -3224,28 +1086,7 @@
           "data": {
             "type": "array",
             "items": {
-              "title": "Engine",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "object": {
-                  "type": "string"
-                },
-                "created": {
-                  "type": "integer",
-                  "nullable": true
-                },
-                "ready": {
-                  "type": "boolean"
-                }
-              },
-              "required": [
-                "id",
-                "object",
-                "created",
-                "ready"
-              ]
+              "$ref": "#/components/schemas/Engine"
             }
           }
         },
@@ -3263,27 +1104,7 @@
           "data": {
             "type": "array",
             "items": {
-              "title": "Model",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "object": {
-                  "type": "string"
-                },
-                "created": {
-                  "type": "integer"
-                },
-                "owned_by": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "object",
-                "created",
-                "owned_by"
-              ]
+              "$ref": "#/components/schemas/Model"
             }
           }
         },
@@ -3317,46 +1138,6 @@
           "model": {
             "description": "ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them.",
             "type": "string"
-          },
-          "prompt": {
-            "description": "The prompt(s) to generate completions for, encoded as a string, array of strings, array of tokens, or array of token arrays.\n\nNote that <|endoftext|> is the document separator that the model sees during training, so if a prompt is not specified the model will generate as if from the beginning of a new document.\n",
-            "default": "<|endoftext|>",
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "string",
-                "default": "",
-                "example": "This is a test."
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "default": "",
-                  "example": "This is a test."
-                }
-              },
-              {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "integer"
-                },
-                "example": "[1212, 318, 257, 1332, 13]"
-              },
-              {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "array",
-                  "minItems": 1,
-                  "items": {
-                    "type": "integer"
-                  }
-                },
-                "example": "[[1212, 318, 257, 1332, 13]]"
-              }
-            ]
           },
           "suffix": {
             "description": "The suffix that comes after a completion of inserted text.",
@@ -4122,42 +1903,7 @@
           "data": {
             "type": "array",
             "items": {
-              "title": "OpenAIFile",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "object": {
-                  "type": "string"
-                },
-                "bytes": {
-                  "type": "integer"
-                },
-                "created_at": {
-                  "type": "integer"
-                },
-                "filename": {
-                  "type": "string"
-                },
-                "purpose": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "string"
-                },
-                "status_details": {
-                  "type": "object",
-                  "nullable": true
-                }
-              },
-              "required": [
-                "id",
-                "object",
-                "bytes",
-                "created_at",
-                "filename",
-                "purpose"
-              ]
+              "$ref": "#/components/schemas/OpenAIFile"
             }
           }
         },
@@ -4644,200 +2390,7 @@
           "data": {
             "type": "array",
             "items": {
-              "title": "FineTune",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "object": {
-                  "type": "string"
-                },
-                "created_at": {
-                  "type": "integer"
-                },
-                "updated_at": {
-                  "type": "integer"
-                },
-                "model": {
-                  "type": "string"
-                },
-                "fine_tuned_model": {
-                  "type": "string",
-                  "nullable": true
-                },
-                "organization_id": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "string"
-                },
-                "hyperparams": {
-                  "type": "object"
-                },
-                "training_files": {
-                  "type": "array",
-                  "items": {
-                    "title": "OpenAIFile",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "object": {
-                        "type": "string"
-                      },
-                      "bytes": {
-                        "type": "integer"
-                      },
-                      "created_at": {
-                        "type": "integer"
-                      },
-                      "filename": {
-                        "type": "string"
-                      },
-                      "purpose": {
-                        "type": "string"
-                      },
-                      "status": {
-                        "type": "string"
-                      },
-                      "status_details": {
-                        "type": "object",
-                        "nullable": true
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "object",
-                      "bytes",
-                      "created_at",
-                      "filename",
-                      "purpose"
-                    ]
-                  }
-                },
-                "validation_files": {
-                  "type": "array",
-                  "items": {
-                    "title": "OpenAIFile",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "object": {
-                        "type": "string"
-                      },
-                      "bytes": {
-                        "type": "integer"
-                      },
-                      "created_at": {
-                        "type": "integer"
-                      },
-                      "filename": {
-                        "type": "string"
-                      },
-                      "purpose": {
-                        "type": "string"
-                      },
-                      "status": {
-                        "type": "string"
-                      },
-                      "status_details": {
-                        "type": "object",
-                        "nullable": true
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "object",
-                      "bytes",
-                      "created_at",
-                      "filename",
-                      "purpose"
-                    ]
-                  }
-                },
-                "result_files": {
-                  "type": "array",
-                  "items": {
-                    "title": "OpenAIFile",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "object": {
-                        "type": "string"
-                      },
-                      "bytes": {
-                        "type": "integer"
-                      },
-                      "created_at": {
-                        "type": "integer"
-                      },
-                      "filename": {
-                        "type": "string"
-                      },
-                      "purpose": {
-                        "type": "string"
-                      },
-                      "status": {
-                        "type": "string"
-                      },
-                      "status_details": {
-                        "type": "object",
-                        "nullable": true
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "object",
-                      "bytes",
-                      "created_at",
-                      "filename",
-                      "purpose"
-                    ]
-                  }
-                },
-                "events": {
-                  "type": "array",
-                  "items": {
-                    "title": "FineTuneEvent",
-                    "properties": {
-                      "object": {
-                        "type": "string"
-                      },
-                      "created_at": {
-                        "type": "integer"
-                      },
-                      "level": {
-                        "type": "string"
-                      },
-                      "message": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "object",
-                      "created_at",
-                      "level",
-                      "message"
-                    ]
-                  }
-                }
-              },
-              "required": [
-                "id",
-                "object",
-                "created_at",
-                "updated_at",
-                "model",
-                "fine_tuned_model",
-                "organization_id",
-                "status",
-                "hyperparams",
-                "training_files",
-                "validation_files",
-                "result_files"
-              ]
+              "$ref": "#/components/schemas/FineTune"
             }
           }
         },
@@ -4855,27 +2408,7 @@
           "data": {
             "type": "array",
             "items": {
-              "title": "FineTuneEvent",
-              "properties": {
-                "object": {
-                  "type": "string"
-                },
-                "created_at": {
-                  "type": "integer"
-                },
-                "level": {
-                  "type": "string"
-                },
-                "message": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "object",
-                "created_at",
-                "level",
-                "message"
-              ]
+              "$ref": "#/components/schemas/FineTuneEvent"
             }
           }
         },
@@ -5118,150 +2651,25 @@
           "training_files": {
             "type": "array",
             "items": {
-              "title": "OpenAIFile",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "object": {
-                  "type": "string"
-                },
-                "bytes": {
-                  "type": "integer"
-                },
-                "created_at": {
-                  "type": "integer"
-                },
-                "filename": {
-                  "type": "string"
-                },
-                "purpose": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "string"
-                },
-                "status_details": {
-                  "type": "object",
-                  "nullable": true
-                }
-              },
-              "required": [
-                "id",
-                "object",
-                "bytes",
-                "created_at",
-                "filename",
-                "purpose"
-              ]
+              "$ref": "#/components/schemas/OpenAIFile"
             }
           },
           "validation_files": {
             "type": "array",
             "items": {
-              "title": "OpenAIFile",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "object": {
-                  "type": "string"
-                },
-                "bytes": {
-                  "type": "integer"
-                },
-                "created_at": {
-                  "type": "integer"
-                },
-                "filename": {
-                  "type": "string"
-                },
-                "purpose": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "string"
-                },
-                "status_details": {
-                  "type": "object",
-                  "nullable": true
-                }
-              },
-              "required": [
-                "id",
-                "object",
-                "bytes",
-                "created_at",
-                "filename",
-                "purpose"
-              ]
+              "$ref": "#/components/schemas/OpenAIFile"
             }
           },
           "result_files": {
             "type": "array",
             "items": {
-              "title": "OpenAIFile",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "object": {
-                  "type": "string"
-                },
-                "bytes": {
-                  "type": "integer"
-                },
-                "created_at": {
-                  "type": "integer"
-                },
-                "filename": {
-                  "type": "string"
-                },
-                "purpose": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "string"
-                },
-                "status_details": {
-                  "type": "object",
-                  "nullable": true
-                }
-              },
-              "required": [
-                "id",
-                "object",
-                "bytes",
-                "created_at",
-                "filename",
-                "purpose"
-              ]
+              "$ref": "#/components/schemas/OpenAIFile"
             }
           },
           "events": {
             "type": "array",
             "items": {
-              "title": "FineTuneEvent",
-              "properties": {
-                "object": {
-                  "type": "string"
-                },
-                "created_at": {
-                  "type": "integer"
-                },
-                "level": {
-                  "type": "string"
-                },
-                "message": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "object",
-                "created_at",
-                "level",
-                "message"
-              ]
+              "$ref": "#/components/schemas/FineTuneEvent"
             }
           }
         },

@@ -5,9 +5,9 @@ schema {
 
 directive @resolveRootField(field: String) on FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @enum(value: String) on ENUM_VALUE
-
 directive @oneOf on OBJECT | INTERFACE
+
+directive @enum(value: String) on ENUM_VALUE
 
 directive @length(min: Int, max: Int) on SCALAR
 
@@ -17,48 +17,48 @@ directive @httpOperation(path: String, operationSpecificHeaders: ObjMap, httpMet
 
 type Query @globalOptions(sourceName: "OpenAI", endpoint: "https://api.openai.com/v1", operationHeaders: "{\"Authorization\":\"Bearer {env.OPENAI_TOKEN}\"}") {
   "Lists the currently available (non-finetuned) models, and provides basic information about each one such as the owner and availability."
-  listEngines: listEngines_200_response @httpOperation(path: "/engines", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
+  listEngines: ListEnginesResponse @httpOperation(path: "/engines", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
   "Retrieves a model instance, providing basic information about it such as the owner and availability."
   retrieveEngine(
     "The ID of the engine to use for this request"
     engine_id: String!
-  ): query_retrieveEngine @httpOperation(path: "/engines/{args.engine_id}", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
+  ): Engine @httpOperation(path: "/engines/{args.engine_id}", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
   "Returns a list of files that belong to the user's organization."
-  listFiles: listFiles_200_response @httpOperation(path: "/files", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
+  listFiles: ListFilesResponse @httpOperation(path: "/files", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
   "Returns information about a specific file."
   retrieveFile(
     "The ID of the file to use for this request"
     file_id: String!
-  ): query_retrieveFile @httpOperation(path: "/files/{args.file_id}", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
+  ): OpenAIFile @httpOperation(path: "/files/{args.file_id}", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
   "Returns the contents of the specified file"
   downloadFile(
     "The ID of the file to use for this request"
     file_id: String!
   ): String @httpOperation(path: "/files/{args.file_id}/content", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
   "List your organization's fine-tuning jobs\n"
-  listFineTunes: listFineTunes_200_response @httpOperation(path: "/fine-tunes", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
+  listFineTunes: ListFineTunesResponse @httpOperation(path: "/fine-tunes", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
   "Gets info about the fine-tune job.\n\n[Learn more about Fine-tuning](/docs/guides/fine-tuning)\n"
   retrieveFineTune(
     "The ID of the fine-tune job"
     fine_tune_id: String!
-  ): query_retrieveFineTune @httpOperation(path: "/fine-tunes/{args.fine_tune_id}", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
+  ): FineTune @httpOperation(path: "/fine-tunes/{args.fine_tune_id}", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
   "Get fine-grained status updates for a fine-tune job.\n"
   listFineTuneEvents(
     "The ID of the fine-tune job to get events for."
     fine_tune_id: String!
     "Whether to stream events for the fine-tune job. If set to true,\nevents will be sent as data-only\n[server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format)\nas they become available. The stream will terminate with a\n`data: [DONE]` message when the job is finished (succeeded, cancelled,\nor failed).\n\nIf set to false, only events generated so far will be returned."
     stream: Boolean
-  ): listFineTuneEvents_200_response @httpOperation(path: "/fine-tunes/{args.fine_tune_id}/events", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET, queryParamArgMap: "{\"stream\":\"stream\"}")
+  ): ListFineTuneEventsResponse @httpOperation(path: "/fine-tunes/{args.fine_tune_id}/events", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET, queryParamArgMap: "{\"stream\":\"stream\"}")
   "Lists the currently available models, and provides basic information about each one such as the owner and availability."
-  listModels: listModels_200_response @httpOperation(path: "/models", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
+  listModels: ListModelsResponse @httpOperation(path: "/models", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
   "Retrieves a model instance, providing basic information about the model such as the owner and permissioning."
   retrieveModel(
     "The ID of the model to use for this request"
     model: String!
-  ): query_retrieveModel @httpOperation(path: "/models/{args.model}", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
+  ): Model @httpOperation(path: "/models/{args.model}", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
 }
 
-type listEngines_200_response {
+type ListEnginesResponse {
   object: String!
   data: [Engine]!
 }
@@ -70,14 +70,7 @@ type Engine {
   ready: Boolean!
 }
 
-type query_retrieveEngine {
-  id: String!
-  object: String!
-  created: Int
-  ready: Boolean!
-}
-
-type listFiles_200_response {
+type ListFilesResponse {
   object: String!
   data: [OpenAIFile]!
 }
@@ -96,18 +89,7 @@ type OpenAIFile {
 "The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf)."
 scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
-type query_retrieveFile {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
-}
-
-type listFineTunes_200_response {
+type ListFineTunesResponse {
   object: String!
   data: [FineTune]!
 }
@@ -122,43 +104,10 @@ type FineTune {
   organization_id: String!
   status: String!
   hyperparams: JSON!
-  training_files: [query_listFineTunes_data_items_training_files_items]!
-  validation_files: [query_listFineTunes_data_items_validation_files_items]!
-  result_files: [query_listFineTunes_data_items_result_files_items]!
+  training_files: [OpenAIFile]!
+  validation_files: [OpenAIFile]!
+  result_files: [OpenAIFile]!
   events: [FineTuneEvent]
-}
-
-type query_listFineTunes_data_items_training_files_items {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
-}
-
-type query_listFineTunes_data_items_validation_files_items {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
-}
-
-type query_listFineTunes_data_items_result_files_items {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
 }
 
 type FineTuneEvent {
@@ -168,75 +117,12 @@ type FineTuneEvent {
   message: String!
 }
 
-type query_retrieveFineTune {
-  id: String!
+type ListFineTuneEventsResponse {
   object: String!
-  created_at: Int!
-  updated_at: Int!
-  model: String!
-  fine_tuned_model: String
-  organization_id: String!
-  status: String!
-  hyperparams: JSON!
-  training_files: [query_retrieveFineTune_training_files_items]!
-  validation_files: [query_retrieveFineTune_validation_files_items]!
-  result_files: [query_retrieveFineTune_result_files_items]!
-  events: [query_retrieveFineTune_events_items]
+  data: [FineTuneEvent]!
 }
 
-type query_retrieveFineTune_training_files_items {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
-}
-
-type query_retrieveFineTune_validation_files_items {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
-}
-
-type query_retrieveFineTune_result_files_items {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
-}
-
-type query_retrieveFineTune_events_items {
-  object: String!
-  created_at: Int!
-  level: String!
-  message: String!
-}
-
-type listFineTuneEvents_200_response {
-  object: String!
-  data: [query_listFineTuneEvents_data_items]!
-}
-
-type query_listFineTuneEvents_data_items {
-  object: String!
-  created_at: Int!
-  level: String!
-  message: String!
-}
-
-type listModels_200_response {
+type ListModelsResponse {
   object: String!
   data: [Model]!
 }
@@ -248,58 +134,122 @@ type Model {
   owned_by: String!
 }
 
-type query_retrieveModel {
-  id: String!
-  object: String!
-  created: Int!
-  owned_by: String!
-}
-
 type Mutation {
+  "Creates a completion for the provided prompt and parameters"
+  createCompletion(input: CreateCompletionRequest_Input): CreateCompletionResponse @httpOperation(path: "/completions", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
   "Creates a new edit for the provided input, instruction, and parameters"
-  createEdit(input: createEdit_request_Input): createEdit_200_response @httpOperation(path: "/edits", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
+  createEdit(input: CreateEditRequest_Input): CreateEditResponse @httpOperation(path: "/edits", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
   "Creates an image given a prompt."
-  createImage(input: createImage_request_Input): createImage_200_response @httpOperation(path: "/images/generations", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
+  createImage(input: CreateImageRequest_Input): ImagesResponse @httpOperation(path: "/images/generations", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
   "Creates an edited or extended image given an original image and a prompt."
-  createImageEdit(input: createImageEdit_request_Input): createImageEdit_200_response @httpOperation(path: "/images/edits", operationSpecificHeaders: "{\"Content-Type\":\"multipart/form-data\",\"accept\":\"application/json\"}", httpMethod: POST)
+  createImageEdit(input: CreateImageEditRequest_Input): ImagesResponse @httpOperation(path: "/images/edits", operationSpecificHeaders: "{\"Content-Type\":\"multipart/form-data\",\"accept\":\"application/json\"}", httpMethod: POST)
   "Creates a variation of a given image."
-  createImageVariation(input: createImageVariation_request_Input): createImageVariation_200_response @httpOperation(path: "/images/variations", operationSpecificHeaders: "{\"Content-Type\":\"multipart/form-data\",\"accept\":\"application/json\"}", httpMethod: POST)
+  createImageVariation(input: CreateImageVariationRequest_Input): ImagesResponse @httpOperation(path: "/images/variations", operationSpecificHeaders: "{\"Content-Type\":\"multipart/form-data\",\"accept\":\"application/json\"}", httpMethod: POST)
   "Creates an embedding vector representing the input text."
-  createEmbedding(input: createEmbedding_request_Input): createEmbedding_200_response @httpOperation(path: "/embeddings", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
+  createEmbedding(input: CreateEmbeddingRequest_Input): CreateEmbeddingResponse @httpOperation(path: "/embeddings", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
   "The search endpoint computes similarity scores between provided query and documents. Documents can be passed directly to the API if there are no more than 200 of them.\n\nTo go beyond the 200 document limit, documents can be processed offline and then used for efficient retrieval at query time. When `file` is set, the search endpoint searches over all the documents in the given file and returns up to the `max_rerank` number of documents. These documents will be returned along with their search scores.\n\nThe similarity score is a positive score that usually ranges from 0 to 300 (but can sometimes go higher), where a score above 200 usually means the document is semantically similar to the query.\n"
   createSearch(
     "The ID of the engine to use for this request.  You can select one of `ada`, `babbage`, `curie`, or `davinci`."
     engine_id: String!
-    input: createSearch_request_Input
-  ): createSearch_200_response @httpOperation(path: "/engines/{args.engine_id}/search", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
+    input: CreateSearchRequest_Input
+  ): CreateSearchResponse @httpOperation(path: "/engines/{args.engine_id}/search", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
   "Upload a file that contains document(s) to be used across various endpoints/features. Currently, the size of all the files uploaded by one organization can be up to 1 GB. Please contact us if you need to increase the storage limit.\n"
-  createFile(input: createFile_request_Input): mutation_createFile @httpOperation(path: "/files", operationSpecificHeaders: "{\"Content-Type\":\"multipart/form-data\",\"accept\":\"application/json\"}", httpMethod: POST)
+  createFile(input: CreateFileRequest_Input): OpenAIFile @httpOperation(path: "/files", operationSpecificHeaders: "{\"Content-Type\":\"multipart/form-data\",\"accept\":\"application/json\"}", httpMethod: POST)
   "Delete a file."
   deleteFile(
     "The ID of the file to use for this request"
     file_id: String!
-  ): deleteFile_200_response @httpOperation(path: "/files/{args.file_id}", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: DELETE)
+  ): DeleteFileResponse @httpOperation(path: "/files/{args.file_id}", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: DELETE)
   "Answers the specified question using the provided documents and examples.\n\nThe endpoint first [searches](/docs/api-reference/searches) over provided documents or files to find relevant context. The relevant context is combined with the provided examples and question to create the prompt for [completion](/docs/api-reference/completions).\n"
-  createAnswer(input: createAnswer_request_Input): createAnswer_200_response @httpOperation(path: "/answers", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
+  createAnswer(input: CreateAnswerRequest_Input): CreateAnswerResponse @httpOperation(path: "/answers", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
   "Classifies the specified `query` using provided examples.\n\nThe endpoint first [searches](/docs/api-reference/searches) over the labeled examples\nto select the ones most relevant for the particular query. Then, the relevant examples\nare combined with the query to construct a prompt to produce the final label via the\n[completions](/docs/api-reference/completions) endpoint.\n\nLabeled examples can be provided via an uploaded `file`, or explicitly listed in the\nrequest using the `examples` parameter for quick tests and small scale use cases.\n"
-  createClassification(input: createClassification_request_Input): createClassification_200_response @httpOperation(path: "/classifications", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
+  createClassification(input: CreateClassificationRequest_Input): CreateClassificationResponse @httpOperation(path: "/classifications", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
   "Creates a job that fine-tunes a specified model from a given dataset.\n\nResponse includes details of the enqueued job including job status and the name of the fine-tuned models once complete.\n\n[Learn more about Fine-tuning](/docs/guides/fine-tuning)\n"
-  createFineTune(input: createFineTune_request_Input): mutation_createFineTune @httpOperation(path: "/fine-tunes", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
+  createFineTune(input: CreateFineTuneRequest_Input): FineTune @httpOperation(path: "/fine-tunes", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
   "Immediately cancel a fine-tune job.\n"
   cancelFineTune(
     "The ID of the fine-tune job to cancel"
     fine_tune_id: String!
-  ): mutation_cancelFineTune @httpOperation(path: "/fine-tunes/{args.fine_tune_id}/cancel", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: POST)
+  ): FineTune @httpOperation(path: "/fine-tunes/{args.fine_tune_id}/cancel", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: POST)
   "Delete a fine-tuned model. You must have the Owner role in your organization."
   deleteModel(
     "The model to delete"
     model: URL!
-  ): deleteModel_200_response @httpOperation(path: "/models/{args.model}", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: DELETE)
+  ): DeleteModelResponse @httpOperation(path: "/models/{args.model}", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: DELETE)
   "Classifies if text violates OpenAI's Content Policy"
-  createModeration(input: createModeration_request_Input): createModeration_200_response @httpOperation(path: "/moderations", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
+  createModeration(input: CreateModerationRequest_Input): CreateModerationResponse @httpOperation(path: "/moderations", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"accept\":\"application/json\"}", httpMethod: POST)
 }
 
-type createEdit_200_response {
+type CreateCompletionResponse {
+  id: String!
+  object: String!
+  created: Int!
+  model: String!
+  choices: [mutation_createCompletion_choices_items]!
+  usage: mutation_createCompletion_usage
+}
+
+type mutation_createCompletion_choices_items {
+  text: String
+  index: Int
+  logprobs: mutation_createCompletion_choices_items_logprobs
+  finish_reason: String
+}
+
+type mutation_createCompletion_choices_items_logprobs {
+  tokens: [String]
+  token_logprobs: [Float]
+  top_logprobs: [JSON]
+  text_offset: [Int]
+}
+
+type mutation_createCompletion_usage {
+  prompt_tokens: Int!
+  completion_tokens: Int!
+  total_tokens: Int!
+}
+
+input CreateCompletionRequest_Input {
+  "ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them."
+  model: String!
+  "The suffix that comes after a completion of inserted text."
+  suffix: String
+  "The maximum number of [tokens](/tokenizer) to generate in the completion.\n\nThe token count of your prompt plus `max_tokens` cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 4096)."
+  max_tokens: NonNegativeInt = 16
+  "What [sampling temperature](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277) to use. Higher values means the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.\n\nWe generally recommend altering this or `top_p` but not both."
+  temperature: NonNegativeFloat = 1
+  "An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.\n\nWe generally recommend altering this or `temperature` but not both."
+  top_p: NonNegativeFloat = 1
+  "How many completions to generate for each prompt.\n\n**Note:** Because this parameter generates many completions, it can quickly consume your token quota. Use carefully and ensure that you have reasonable settings for `max_tokens` and `stop`."
+  n: PositiveInt = 1
+  "Whether to stream back partial progress. If set, tokens will be sent as data-only [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format) as they become available, with the stream terminated by a `data: [DONE]` message."
+  stream: Boolean
+  "Include the log probabilities on the `logprobs` most likely tokens, as well the chosen tokens. For example, if `logprobs` is 5, the API will return a list of the 5 most likely tokens. The API will always return the `logprob` of the sampled token, so there may be up to `logprobs+1` elements in the response.\n\nThe maximum value for `logprobs` is 5. If you need more than this, please contact us through our [Help center](https://help.openai.com) and describe your use case."
+  logprobs: NonNegativeInt
+  "Echo back the prompt in addition to the completion"
+  echo: Boolean
+  stop: [String]
+  "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.\n\n[See more information about frequency and presence penalties.](/docs/api-reference/parameter-details)"
+  presence_penalty: Float
+  "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.\n\n[See more information about frequency and presence penalties.](/docs/api-reference/parameter-details)"
+  frequency_penalty: Float
+  "Generates `best_of` completions server-side and returns the \"best\" (the one with the highest log probability per token). Results cannot be streamed.\n\nWhen used with `n`, `best_of` controls the number of candidate completions and `n` specifies how many to return – `best_of` must be greater than `n`.\n\n**Note:** Because this parameter generates many completions, it can quickly consume your token quota. Use carefully and ensure that you have reasonable settings for `max_tokens` and `stop`."
+  best_of: NonNegativeInt = 1
+  logit_bias: JSON
+  "A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids)."
+  user: String
+}
+
+"Integers that will have a value of 0 or more."
+scalar NonNegativeInt
+
+"Floats that will have a value of 0 or more."
+scalar NonNegativeFloat
+
+"Integers that will have a value greater than 0."
+scalar PositiveInt
+
+type CreateEditResponse {
   id: String!
   object: String!
   created: Int!
@@ -328,7 +278,7 @@ type mutation_createEdit_usage {
   total_tokens: Int!
 }
 
-input createEdit_request_Input {
+input CreateEditRequest_Input {
   "ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them."
   model: String!
   "The input text to use as a starting point for the edit."
@@ -343,13 +293,7 @@ input createEdit_request_Input {
   top_p: NonNegativeFloat = 1
 }
 
-"Integers that will have a value greater than 0."
-scalar PositiveInt
-
-"Floats that will have a value of 0 or more."
-scalar NonNegativeFloat
-
-type createImage_200_response {
+type ImagesResponse {
   created: Int!
   data: [mutation_createImage_data_items]!
 }
@@ -359,7 +303,7 @@ type mutation_createImage_data_items {
   b64_json: String
 }
 
-input createImage_request_Input {
+input CreateImageRequest_Input {
   "A text description of the desired image(s). The maximum length is 1000 characters."
   prompt: String!
   "The number of images to generate. Must be between 1 and 10."
@@ -383,17 +327,7 @@ enum mutationInput_createImage_input_response_format {
   b64_json
 }
 
-type createImageEdit_200_response {
-  created: Int!
-  data: [mutation_createImageEdit_data_items]!
-}
-
-type mutation_createImageEdit_data_items {
-  url: String
-  b64_json: String
-}
-
-input createImageEdit_request_Input {
+input CreateImageEditRequest_Input {
   "The image to edit. Must be a valid PNG file, less than 4MB, and square. If mask is not provided, image must have transparency, which will be used as the mask."
   image: File!
   "An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where `image` should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as `image`."
@@ -424,17 +358,7 @@ enum mutationInput_createImageEdit_input_response_format {
   b64_json
 }
 
-type createImageVariation_200_response {
-  created: Int!
-  data: [mutation_createImageVariation_data_items]!
-}
-
-type mutation_createImageVariation_data_items {
-  url: String
-  b64_json: String
-}
-
-input createImageVariation_request_Input {
+input CreateImageVariationRequest_Input {
   "The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square."
   image: File!
   "The number of images to generate. Must be between 1 and 10."
@@ -458,7 +382,7 @@ enum mutationInput_createImageVariation_input_response_format {
   b64_json
 }
 
-type createEmbedding_200_response {
+type CreateEmbeddingResponse {
   object: String!
   model: String!
   data: [mutation_createEmbedding_data_items]!
@@ -476,7 +400,7 @@ type mutation_createEmbedding_usage {
   total_tokens: Int!
 }
 
-input createEmbedding_request_Input {
+input CreateEmbeddingRequest_Input {
   "ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them."
   model: String!
   "Input text to get embeddings for, encoded as a string or array of tokens. To get embeddings for multiple inputs in a single request, pass an array of strings or array of token arrays. Each input must not exceed 8192 tokens in length."
@@ -485,7 +409,7 @@ input createEmbedding_request_Input {
   user: String
 }
 
-type createSearch_200_response {
+type CreateSearchResponse {
   object: String
   model: String
   data: [mutation_createSearch_data_items]
@@ -497,7 +421,7 @@ type mutation_createSearch_data_items {
   score: Float
 }
 
-input createSearch_request_Input {
+input CreateSearchRequest_Input {
   "Query to search against the documents."
   query: NonEmptyString!
   "Up to 200 documents to search over, provided as a list of strings.\n\nThe maximum document length (in tokens) is 2034 minus the number of tokens in the query.\n\nYou should specify either `documents` or a `file`, but not both."
@@ -515,31 +439,20 @@ input createSearch_request_Input {
 "A string that cannot be passed as an empty value"
 scalar NonEmptyString
 
-type mutation_createFile {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
-}
-
-input createFile_request_Input {
+input CreateFileRequest_Input {
   "Name of the [JSON Lines](https://jsonlines.readthedocs.io/en/latest/) file to be uploaded.\n\nIf the `purpose` is set to \"fine-tune\", each line is a JSON record with \"prompt\" and \"completion\" fields representing your [training examples](/docs/guides/fine-tuning/prepare-training-data)."
   file: File!
   "The intended purpose of the uploaded documents.\n\nUse \"fine-tune\" for [Fine-tuning](/docs/api-reference/fine-tunes). This allows us to validate the format of the uploaded file."
   purpose: String!
 }
 
-type deleteFile_200_response {
+type DeleteFileResponse {
   id: String!
   object: String!
   deleted: Boolean!
 }
 
-type createAnswer_200_response {
+type CreateAnswerResponse {
   object: String
   model: String
   search_model: String
@@ -553,7 +466,7 @@ type mutation_createAnswer_selected_documents_items {
   text: String
 }
 
-input createAnswer_request_Input {
+input CreateAnswerRequest_Input {
   "ID of the model to use for completion. You can select one of `ada`, `babbage`, `curie`, or `davinci`."
   model: String!
   "Question to get answered."
@@ -590,10 +503,7 @@ input createAnswer_request_Input {
   user: String
 }
 
-"Integers that will have a value of 0 or more."
-scalar NonNegativeInt
-
-type createClassification_200_response {
+type CreateClassificationResponse {
   object: String
   model: String
   search_model: String
@@ -608,7 +518,7 @@ type mutation_createClassification_selected_examples_items {
   label: String
 }
 
-input createClassification_request_Input {
+input CreateClassificationRequest_Input {
   "ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them."
   model: String!
   "Query to be classified."
@@ -638,63 +548,7 @@ input createClassification_request_Input {
   user: String
 }
 
-type mutation_createFineTune {
-  id: String!
-  object: String!
-  created_at: Int!
-  updated_at: Int!
-  model: String!
-  fine_tuned_model: String
-  organization_id: String!
-  status: String!
-  hyperparams: JSON!
-  training_files: [mutation_createFineTune_training_files_items]!
-  validation_files: [mutation_createFineTune_validation_files_items]!
-  result_files: [mutation_createFineTune_result_files_items]!
-  events: [mutation_createFineTune_events_items]
-}
-
-type mutation_createFineTune_training_files_items {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
-}
-
-type mutation_createFineTune_validation_files_items {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
-}
-
-type mutation_createFineTune_result_files_items {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
-}
-
-type mutation_createFineTune_events_items {
-  object: String!
-  created_at: Int!
-  level: String!
-  message: String!
-}
-
-input createFineTune_request_Input {
+input CreateFineTuneRequest_Input {
   "The ID of an uploaded file that contains training data.\n\nSee [upload file](/docs/api-reference/files/upload) for how to upload a file.\n\nYour dataset must be formatted as a JSONL file, where each training\nexample is a JSON object with the keys \"prompt\" and \"completion\".\nAdditionally, you must upload your file with the purpose `fine-tune`.\n\nSee the [fine-tuning guide](/docs/guides/fine-tuning/creating-training-data) for more details."
   training_file: String!
   "The ID of an uploaded file that contains validation data.\n\nIf you provide this file, the data is used to generate validation\nmetrics periodically during fine-tuning. These metrics can be viewed in\nthe [fine-tuning results file](/docs/guides/fine-tuning/analyzing-your-fine-tuned-model).\nYour train and validation data should be mutually exclusive.\n\nYour dataset must be formatted as a JSONL file, where each validation\nexample is a JSON object with the keys \"prompt\" and \"completion\".\nAdditionally, you must upload your file with the purpose `fine-tune`.\n\nSee the [fine-tuning guide](/docs/guides/fine-tuning/creating-training-data) for more details."
@@ -724,63 +578,7 @@ input createFineTune_request_Input {
 "A string of up to 40 characters that will be added to your fine-tuned model name.\n\nFor example, a `suffix` of \"custom-model-name\" would produce a model name like `ada:ft-your-org:custom-model-name-2022-02-15-04-21-04`."
 scalar mutationInput_createFineTune_input_suffix @length(min: 1, max: 40)
 
-type mutation_cancelFineTune {
-  id: String!
-  object: String!
-  created_at: Int!
-  updated_at: Int!
-  model: String!
-  fine_tuned_model: String
-  organization_id: String!
-  status: String!
-  hyperparams: JSON!
-  training_files: [mutation_cancelFineTune_training_files_items]!
-  validation_files: [mutation_cancelFineTune_validation_files_items]!
-  result_files: [mutation_cancelFineTune_result_files_items]!
-  events: [mutation_cancelFineTune_events_items]
-}
-
-type mutation_cancelFineTune_training_files_items {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
-}
-
-type mutation_cancelFineTune_validation_files_items {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
-}
-
-type mutation_cancelFineTune_result_files_items {
-  id: String!
-  object: String!
-  bytes: Int!
-  created_at: Int!
-  filename: String!
-  purpose: String!
-  status: String
-  status_details: JSON
-}
-
-type mutation_cancelFineTune_events_items {
-  object: String!
-  created_at: Int!
-  level: String!
-  message: String!
-}
-
-type deleteModel_200_response {
+type DeleteModelResponse {
   id: String!
   object: String!
   deleted: Boolean!
@@ -789,7 +587,7 @@ type deleteModel_200_response {
 "A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt."
 scalar URL
 
-type createModeration_200_response {
+type CreateModerationResponse {
   id: String!
   model: String!
   results: [mutation_createModeration_results_items]!
@@ -821,7 +619,7 @@ type mutation_createModeration_results_items_category_scores {
   violence_graphic: Float! @resolveRootField(field: "violence/graphic")
 }
 
-input createModeration_request_Input {
+input CreateModerationRequest_Input {
   input: [String]!
   "Two content moderations models are available: `text-moderation-stable` and `text-moderation-latest`.\n\nThe default is `text-moderation-latest` which will be automatically upgraded over time. This ensures you are always using our most accurate model. If you use `text-moderation-stable`, we will provide advanced notice before updating the model. Accuracy of `text-moderation-stable` may be slightly lower than for `text-moderation-latest`."
   model: String! = "text-moderation-latest"

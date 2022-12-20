@@ -22,16 +22,16 @@ export type Scalars = {
   Float: number;
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: any;
-  /** Integers that will have a value greater than 0. */
-  PositiveInt: number;
+  /** Integers that will have a value of 0 or more. */
+  NonNegativeInt: number;
   /** Floats that will have a value of 0 or more. */
   NonNegativeFloat: number;
+  /** Integers that will have a value greater than 0. */
+  PositiveInt: number;
   /** The `File` scalar type represents a file upload. */
   File: File;
   /** A string that cannot be passed as an empty value */
   NonEmptyString: string;
-  /** Integers that will have a value of 0 or more. */
-  NonNegativeInt: number;
   /**
    * A string of up to 40 characters that will be added to your fine-tuned model name.
    *
@@ -45,36 +45,36 @@ export type Scalars = {
 
 export type Query = {
   /** Lists the currently available (non-finetuned) models, and provides basic information about each one such as the owner and availability. */
-  listEngines?: Maybe<listEngines_200_response>;
+  listEngines?: Maybe<ListEnginesResponse>;
   /** Retrieves a model instance, providing basic information about it such as the owner and availability. */
-  retrieveEngine?: Maybe<query_retrieveEngine>;
+  retrieveEngine?: Maybe<Engine>;
   /** Returns a list of files that belong to the user's organization. */
-  listFiles?: Maybe<listFiles_200_response>;
+  listFiles?: Maybe<ListFilesResponse>;
   /** Returns information about a specific file. */
-  retrieveFile?: Maybe<query_retrieveFile>;
+  retrieveFile?: Maybe<OpenAIFile>;
   /** Returns the contents of the specified file */
   downloadFile?: Maybe<Scalars['String']>;
   /**
    * List your organization's fine-tuning jobs
    *
    */
-  listFineTunes?: Maybe<listFineTunes_200_response>;
+  listFineTunes?: Maybe<ListFineTunesResponse>;
   /**
    * Gets info about the fine-tune job.
    *
    * [Learn more about Fine-tuning](/docs/guides/fine-tuning)
    *
    */
-  retrieveFineTune?: Maybe<query_retrieveFineTune>;
+  retrieveFineTune?: Maybe<FineTune>;
   /**
    * Get fine-grained status updates for a fine-tune job.
    *
    */
-  listFineTuneEvents?: Maybe<listFineTuneEvents_200_response>;
+  listFineTuneEvents?: Maybe<ListFineTuneEventsResponse>;
   /** Lists the currently available models, and provides basic information about each one such as the owner and availability. */
-  listModels?: Maybe<listModels_200_response>;
+  listModels?: Maybe<ListModelsResponse>;
   /** Retrieves a model instance, providing basic information about the model such as the owner and permissioning. */
-  retrieveModel?: Maybe<query_retrieveModel>;
+  retrieveModel?: Maybe<Model>;
 };
 
 
@@ -108,7 +108,7 @@ export type QueryretrieveModelArgs = {
   model: Scalars['String'];
 };
 
-export type listEngines_200_response = {
+export type ListEnginesResponse = {
   object: Scalars['String'];
   data: Array<Maybe<Engine>>;
 };
@@ -120,14 +120,7 @@ export type Engine = {
   ready: Scalars['Boolean'];
 };
 
-export type query_retrieveEngine = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  created?: Maybe<Scalars['Int']>;
-  ready: Scalars['Boolean'];
-};
-
-export type listFiles_200_response = {
+export type ListFilesResponse = {
   object: Scalars['String'];
   data: Array<Maybe<OpenAIFile>>;
 };
@@ -143,18 +136,7 @@ export type OpenAIFile = {
   status_details?: Maybe<Scalars['JSON']>;
 };
 
-export type query_retrieveFile = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
-};
-
-export type listFineTunes_200_response = {
+export type ListFineTunesResponse = {
   object: Scalars['String'];
   data: Array<Maybe<FineTune>>;
 };
@@ -169,43 +151,10 @@ export type FineTune = {
   organization_id: Scalars['String'];
   status: Scalars['String'];
   hyperparams: Scalars['JSON'];
-  training_files: Array<Maybe<query_listFineTunes_data_items_training_files_items>>;
-  validation_files: Array<Maybe<query_listFineTunes_data_items_validation_files_items>>;
-  result_files: Array<Maybe<query_listFineTunes_data_items_result_files_items>>;
+  training_files: Array<Maybe<OpenAIFile>>;
+  validation_files: Array<Maybe<OpenAIFile>>;
+  result_files: Array<Maybe<OpenAIFile>>;
   events?: Maybe<Array<Maybe<FineTuneEvent>>>;
-};
-
-export type query_listFineTunes_data_items_training_files_items = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
-};
-
-export type query_listFineTunes_data_items_validation_files_items = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
-};
-
-export type query_listFineTunes_data_items_result_files_items = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
 };
 
 export type FineTuneEvent = {
@@ -215,75 +164,12 @@ export type FineTuneEvent = {
   message: Scalars['String'];
 };
 
-export type query_retrieveFineTune = {
-  id: Scalars['String'];
+export type ListFineTuneEventsResponse = {
   object: Scalars['String'];
-  created_at: Scalars['Int'];
-  updated_at: Scalars['Int'];
-  model: Scalars['String'];
-  fine_tuned_model?: Maybe<Scalars['String']>;
-  organization_id: Scalars['String'];
-  status: Scalars['String'];
-  hyperparams: Scalars['JSON'];
-  training_files: Array<Maybe<query_retrieveFineTune_training_files_items>>;
-  validation_files: Array<Maybe<query_retrieveFineTune_validation_files_items>>;
-  result_files: Array<Maybe<query_retrieveFineTune_result_files_items>>;
-  events?: Maybe<Array<Maybe<query_retrieveFineTune_events_items>>>;
+  data: Array<Maybe<FineTuneEvent>>;
 };
 
-export type query_retrieveFineTune_training_files_items = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
-};
-
-export type query_retrieveFineTune_validation_files_items = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
-};
-
-export type query_retrieveFineTune_result_files_items = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
-};
-
-export type query_retrieveFineTune_events_items = {
-  object: Scalars['String'];
-  created_at: Scalars['Int'];
-  level: Scalars['String'];
-  message: Scalars['String'];
-};
-
-export type listFineTuneEvents_200_response = {
-  object: Scalars['String'];
-  data: Array<Maybe<query_listFineTuneEvents_data_items>>;
-};
-
-export type query_listFineTuneEvents_data_items = {
-  object: Scalars['String'];
-  created_at: Scalars['Int'];
-  level: Scalars['String'];
-  message: Scalars['String'];
-};
-
-export type listModels_200_response = {
+export type ListModelsResponse = {
   object: Scalars['String'];
   data: Array<Maybe<Model>>;
 };
@@ -295,24 +181,19 @@ export type Model = {
   owned_by: Scalars['String'];
 };
 
-export type query_retrieveModel = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  created: Scalars['Int'];
-  owned_by: Scalars['String'];
-};
-
 export type Mutation = {
+  /** Creates a completion for the provided prompt and parameters */
+  createCompletion?: Maybe<CreateCompletionResponse>;
   /** Creates a new edit for the provided input, instruction, and parameters */
-  createEdit?: Maybe<createEdit_200_response>;
+  createEdit?: Maybe<CreateEditResponse>;
   /** Creates an image given a prompt. */
-  createImage?: Maybe<createImage_200_response>;
+  createImage?: Maybe<ImagesResponse>;
   /** Creates an edited or extended image given an original image and a prompt. */
-  createImageEdit?: Maybe<createImageEdit_200_response>;
+  createImageEdit?: Maybe<ImagesResponse>;
   /** Creates a variation of a given image. */
-  createImageVariation?: Maybe<createImageVariation_200_response>;
+  createImageVariation?: Maybe<ImagesResponse>;
   /** Creates an embedding vector representing the input text. */
-  createEmbedding?: Maybe<createEmbedding_200_response>;
+  createEmbedding?: Maybe<CreateEmbeddingResponse>;
   /**
    * The search endpoint computes similarity scores between provided query and documents. Documents can be passed directly to the API if there are no more than 200 of them.
    *
@@ -321,21 +202,21 @@ export type Mutation = {
    * The similarity score is a positive score that usually ranges from 0 to 300 (but can sometimes go higher), where a score above 200 usually means the document is semantically similar to the query.
    *
    */
-  createSearch?: Maybe<createSearch_200_response>;
+  createSearch?: Maybe<CreateSearchResponse>;
   /**
    * Upload a file that contains document(s) to be used across various endpoints/features. Currently, the size of all the files uploaded by one organization can be up to 1 GB. Please contact us if you need to increase the storage limit.
    *
    */
-  createFile?: Maybe<mutation_createFile>;
+  createFile?: Maybe<OpenAIFile>;
   /** Delete a file. */
-  deleteFile?: Maybe<deleteFile_200_response>;
+  deleteFile?: Maybe<DeleteFileResponse>;
   /**
    * Answers the specified question using the provided documents and examples.
    *
    * The endpoint first [searches](/docs/api-reference/searches) over provided documents or files to find relevant context. The relevant context is combined with the provided examples and question to create the prompt for [completion](/docs/api-reference/completions).
    *
    */
-  createAnswer?: Maybe<createAnswer_200_response>;
+  createAnswer?: Maybe<CreateAnswerResponse>;
   /**
    * Classifies the specified `query` using provided examples.
    *
@@ -348,7 +229,7 @@ export type Mutation = {
    * request using the `examples` parameter for quick tests and small scale use cases.
    *
    */
-  createClassification?: Maybe<createClassification_200_response>;
+  createClassification?: Maybe<CreateClassificationResponse>;
   /**
    * Creates a job that fine-tunes a specified model from a given dataset.
    *
@@ -357,52 +238,57 @@ export type Mutation = {
    * [Learn more about Fine-tuning](/docs/guides/fine-tuning)
    *
    */
-  createFineTune?: Maybe<mutation_createFineTune>;
+  createFineTune?: Maybe<FineTune>;
   /**
    * Immediately cancel a fine-tune job.
    *
    */
-  cancelFineTune?: Maybe<mutation_cancelFineTune>;
+  cancelFineTune?: Maybe<FineTune>;
   /** Delete a fine-tuned model. You must have the Owner role in your organization. */
-  deleteModel?: Maybe<deleteModel_200_response>;
+  deleteModel?: Maybe<DeleteModelResponse>;
   /** Classifies if text violates OpenAI's Content Policy */
-  createModeration?: Maybe<createModeration_200_response>;
+  createModeration?: Maybe<CreateModerationResponse>;
+};
+
+
+export type MutationcreateCompletionArgs = {
+  input?: InputMaybe<CreateCompletionRequest_Input>;
 };
 
 
 export type MutationcreateEditArgs = {
-  input?: InputMaybe<createEdit_request_Input>;
+  input?: InputMaybe<CreateEditRequest_Input>;
 };
 
 
 export type MutationcreateImageArgs = {
-  input?: InputMaybe<createImage_request_Input>;
+  input?: InputMaybe<CreateImageRequest_Input>;
 };
 
 
 export type MutationcreateImageEditArgs = {
-  input?: InputMaybe<createImageEdit_request_Input>;
+  input?: InputMaybe<CreateImageEditRequest_Input>;
 };
 
 
 export type MutationcreateImageVariationArgs = {
-  input?: InputMaybe<createImageVariation_request_Input>;
+  input?: InputMaybe<CreateImageVariationRequest_Input>;
 };
 
 
 export type MutationcreateEmbeddingArgs = {
-  input?: InputMaybe<createEmbedding_request_Input>;
+  input?: InputMaybe<CreateEmbeddingRequest_Input>;
 };
 
 
 export type MutationcreateSearchArgs = {
   engine_id: Scalars['String'];
-  input?: InputMaybe<createSearch_request_Input>;
+  input?: InputMaybe<CreateSearchRequest_Input>;
 };
 
 
 export type MutationcreateFileArgs = {
-  input?: InputMaybe<createFile_request_Input>;
+  input?: InputMaybe<CreateFileRequest_Input>;
 };
 
 
@@ -412,17 +298,17 @@ export type MutationdeleteFileArgs = {
 
 
 export type MutationcreateAnswerArgs = {
-  input?: InputMaybe<createAnswer_request_Input>;
+  input?: InputMaybe<CreateAnswerRequest_Input>;
 };
 
 
 export type MutationcreateClassificationArgs = {
-  input?: InputMaybe<createClassification_request_Input>;
+  input?: InputMaybe<CreateClassificationRequest_Input>;
 };
 
 
 export type MutationcreateFineTuneArgs = {
-  input?: InputMaybe<createFineTune_request_Input>;
+  input?: InputMaybe<CreateFineTuneRequest_Input>;
 };
 
 
@@ -437,10 +323,104 @@ export type MutationdeleteModelArgs = {
 
 
 export type MutationcreateModerationArgs = {
-  input?: InputMaybe<createModeration_request_Input>;
+  input?: InputMaybe<CreateModerationRequest_Input>;
 };
 
-export type createEdit_200_response = {
+export type CreateCompletionResponse = {
+  id: Scalars['String'];
+  object: Scalars['String'];
+  created: Scalars['Int'];
+  model: Scalars['String'];
+  choices: Array<Maybe<mutation_createCompletion_choices_items>>;
+  usage?: Maybe<mutation_createCompletion_usage>;
+};
+
+export type mutation_createCompletion_choices_items = {
+  text?: Maybe<Scalars['String']>;
+  index?: Maybe<Scalars['Int']>;
+  logprobs?: Maybe<mutation_createCompletion_choices_items_logprobs>;
+  finish_reason?: Maybe<Scalars['String']>;
+};
+
+export type mutation_createCompletion_choices_items_logprobs = {
+  tokens?: Maybe<Array<Maybe<Scalars['String']>>>;
+  token_logprobs?: Maybe<Array<Maybe<Scalars['Float']>>>;
+  top_logprobs?: Maybe<Array<Maybe<Scalars['JSON']>>>;
+  text_offset?: Maybe<Array<Maybe<Scalars['Int']>>>;
+};
+
+export type mutation_createCompletion_usage = {
+  prompt_tokens: Scalars['Int'];
+  completion_tokens: Scalars['Int'];
+  total_tokens: Scalars['Int'];
+};
+
+export type CreateCompletionRequest_Input = {
+  /** ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them. */
+  model: Scalars['String'];
+  /** The suffix that comes after a completion of inserted text. */
+  suffix?: InputMaybe<Scalars['String']>;
+  /**
+   * The maximum number of [tokens](/tokenizer) to generate in the completion.
+   *
+   * The token count of your prompt plus `max_tokens` cannot exceed the model's context length. Most models have a context length of 2048 tokens (except for the newest models, which support 4096).
+   */
+  max_tokens?: InputMaybe<Scalars['NonNegativeInt']>;
+  /**
+   * What [sampling temperature](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277) to use. Higher values means the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.
+   *
+   * We generally recommend altering this or `top_p` but not both.
+   */
+  temperature?: InputMaybe<Scalars['NonNegativeFloat']>;
+  /**
+   * An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.
+   *
+   * We generally recommend altering this or `temperature` but not both.
+   */
+  top_p?: InputMaybe<Scalars['NonNegativeFloat']>;
+  /**
+   * How many completions to generate for each prompt.
+   *
+   * **Note:** Because this parameter generates many completions, it can quickly consume your token quota. Use carefully and ensure that you have reasonable settings for `max_tokens` and `stop`.
+   */
+  n?: InputMaybe<Scalars['PositiveInt']>;
+  /** Whether to stream back partial progress. If set, tokens will be sent as data-only [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format) as they become available, with the stream terminated by a `data: [DONE]` message. */
+  stream?: InputMaybe<Scalars['Boolean']>;
+  /**
+   * Include the log probabilities on the `logprobs` most likely tokens, as well the chosen tokens. For example, if `logprobs` is 5, the API will return a list of the 5 most likely tokens. The API will always return the `logprob` of the sampled token, so there may be up to `logprobs+1` elements in the response.
+   *
+   * The maximum value for `logprobs` is 5. If you need more than this, please contact us through our [Help center](https://help.openai.com) and describe your use case.
+   */
+  logprobs?: InputMaybe<Scalars['NonNegativeInt']>;
+  /** Echo back the prompt in addition to the completion */
+  echo?: InputMaybe<Scalars['Boolean']>;
+  stop?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  /**
+   * Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.
+   *
+   * [See more information about frequency and presence penalties.](/docs/api-reference/parameter-details)
+   */
+  presence_penalty?: InputMaybe<Scalars['Float']>;
+  /**
+   * Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.
+   *
+   * [See more information about frequency and presence penalties.](/docs/api-reference/parameter-details)
+   */
+  frequency_penalty?: InputMaybe<Scalars['Float']>;
+  /**
+   * Generates `best_of` completions server-side and returns the "best" (the one with the highest log probability per token). Results cannot be streamed.
+   *
+   * When used with `n`, `best_of` controls the number of candidate completions and `n` specifies how many to return – `best_of` must be greater than `n`.
+   *
+   * **Note:** Because this parameter generates many completions, it can quickly consume your token quota. Use carefully and ensure that you have reasonable settings for `max_tokens` and `stop`.
+   */
+  best_of?: InputMaybe<Scalars['NonNegativeInt']>;
+  logit_bias?: InputMaybe<Scalars['JSON']>;
+  /** A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids). */
+  user?: InputMaybe<Scalars['String']>;
+};
+
+export type CreateEditResponse = {
   id: Scalars['String'];
   object: Scalars['String'];
   created: Scalars['Int'];
@@ -469,7 +449,7 @@ export type mutation_createEdit_usage = {
   total_tokens: Scalars['Int'];
 };
 
-export type createEdit_request_Input = {
+export type CreateEditRequest_Input = {
   /** ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them. */
   model: Scalars['String'];
   /** The input text to use as a starting point for the edit. */
@@ -492,7 +472,7 @@ export type createEdit_request_Input = {
   top_p?: InputMaybe<Scalars['NonNegativeFloat']>;
 };
 
-export type createImage_200_response = {
+export type ImagesResponse = {
   created: Scalars['Int'];
   data: Array<Maybe<mutation_createImage_data_items>>;
 };
@@ -502,7 +482,7 @@ export type mutation_createImage_data_items = {
   b64_json?: Maybe<Scalars['String']>;
 };
 
-export type createImage_request_Input = {
+export type CreateImageRequest_Input = {
   /** A text description of the desired image(s). The maximum length is 1000 characters. */
   prompt: Scalars['String'];
   /** The number of images to generate. Must be between 1 and 10. */
@@ -524,17 +504,7 @@ export type mutationInput_createImage_input_response_format =
   | 'url'
   | 'b64_json';
 
-export type createImageEdit_200_response = {
-  created: Scalars['Int'];
-  data: Array<Maybe<mutation_createImageEdit_data_items>>;
-};
-
-export type mutation_createImageEdit_data_items = {
-  url?: Maybe<Scalars['String']>;
-  b64_json?: Maybe<Scalars['String']>;
-};
-
-export type createImageEdit_request_Input = {
+export type CreateImageEditRequest_Input = {
   /** The image to edit. Must be a valid PNG file, less than 4MB, and square. If mask is not provided, image must have transparency, which will be used as the mask. */
   image: Scalars['File'];
   /** An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where `image` should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as `image`. */
@@ -560,17 +530,7 @@ export type mutationInput_createImageEdit_input_response_format =
   | 'url'
   | 'b64_json';
 
-export type createImageVariation_200_response = {
-  created: Scalars['Int'];
-  data: Array<Maybe<mutation_createImageVariation_data_items>>;
-};
-
-export type mutation_createImageVariation_data_items = {
-  url?: Maybe<Scalars['String']>;
-  b64_json?: Maybe<Scalars['String']>;
-};
-
-export type createImageVariation_request_Input = {
+export type CreateImageVariationRequest_Input = {
   /** The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square. */
   image: Scalars['File'];
   /** The number of images to generate. Must be between 1 and 10. */
@@ -592,7 +552,7 @@ export type mutationInput_createImageVariation_input_response_format =
   | 'url'
   | 'b64_json';
 
-export type createEmbedding_200_response = {
+export type CreateEmbeddingResponse = {
   object: Scalars['String'];
   model: Scalars['String'];
   data: Array<Maybe<mutation_createEmbedding_data_items>>;
@@ -610,7 +570,7 @@ export type mutation_createEmbedding_usage = {
   total_tokens: Scalars['Int'];
 };
 
-export type createEmbedding_request_Input = {
+export type CreateEmbeddingRequest_Input = {
   /** ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them. */
   model: Scalars['String'];
   /** Input text to get embeddings for, encoded as a string or array of tokens. To get embeddings for multiple inputs in a single request, pass an array of strings or array of token arrays. Each input must not exceed 8192 tokens in length. */
@@ -619,7 +579,7 @@ export type createEmbedding_request_Input = {
   user?: InputMaybe<Scalars['String']>;
 };
 
-export type createSearch_200_response = {
+export type CreateSearchResponse = {
   object?: Maybe<Scalars['String']>;
   model?: Maybe<Scalars['String']>;
   data?: Maybe<Array<Maybe<mutation_createSearch_data_items>>>;
@@ -631,7 +591,7 @@ export type mutation_createSearch_data_items = {
   score?: Maybe<Scalars['Float']>;
 };
 
-export type createSearch_request_Input = {
+export type CreateSearchRequest_Input = {
   /** Query to search against the documents. */
   query: Scalars['NonEmptyString'];
   /**
@@ -664,18 +624,7 @@ export type createSearch_request_Input = {
   user?: InputMaybe<Scalars['String']>;
 };
 
-export type mutation_createFile = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
-};
-
-export type createFile_request_Input = {
+export type CreateFileRequest_Input = {
   /**
    * Name of the [JSON Lines](https://jsonlines.readthedocs.io/en/latest/) file to be uploaded.
    *
@@ -690,13 +639,13 @@ export type createFile_request_Input = {
   purpose: Scalars['String'];
 };
 
-export type deleteFile_200_response = {
+export type DeleteFileResponse = {
   id: Scalars['String'];
   object: Scalars['String'];
   deleted: Scalars['Boolean'];
 };
 
-export type createAnswer_200_response = {
+export type CreateAnswerResponse = {
   object?: Maybe<Scalars['String']>;
   model?: Maybe<Scalars['String']>;
   search_model?: Maybe<Scalars['String']>;
@@ -710,7 +659,7 @@ export type mutation_createAnswer_selected_documents_items = {
   text?: Maybe<Scalars['String']>;
 };
 
-export type createAnswer_request_Input = {
+export type CreateAnswerRequest_Input = {
   /** ID of the model to use for completion. You can select one of `ada`, `babbage`, `curie`, or `davinci`. */
   model: Scalars['String'];
   /** Question to get answered. */
@@ -765,7 +714,7 @@ export type createAnswer_request_Input = {
   user?: InputMaybe<Scalars['String']>;
 };
 
-export type createClassification_200_response = {
+export type CreateClassificationResponse = {
   object?: Maybe<Scalars['String']>;
   model?: Maybe<Scalars['String']>;
   search_model?: Maybe<Scalars['String']>;
@@ -780,7 +729,7 @@ export type mutation_createClassification_selected_examples_items = {
   label?: Maybe<Scalars['String']>;
 };
 
-export type createClassification_request_Input = {
+export type CreateClassificationRequest_Input = {
   /** ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them. */
   model: Scalars['String'];
   /** Query to be classified. */
@@ -832,63 +781,7 @@ export type createClassification_request_Input = {
   user?: InputMaybe<Scalars['String']>;
 };
 
-export type mutation_createFineTune = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  created_at: Scalars['Int'];
-  updated_at: Scalars['Int'];
-  model: Scalars['String'];
-  fine_tuned_model?: Maybe<Scalars['String']>;
-  organization_id: Scalars['String'];
-  status: Scalars['String'];
-  hyperparams: Scalars['JSON'];
-  training_files: Array<Maybe<mutation_createFineTune_training_files_items>>;
-  validation_files: Array<Maybe<mutation_createFineTune_validation_files_items>>;
-  result_files: Array<Maybe<mutation_createFineTune_result_files_items>>;
-  events?: Maybe<Array<Maybe<mutation_createFineTune_events_items>>>;
-};
-
-export type mutation_createFineTune_training_files_items = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
-};
-
-export type mutation_createFineTune_validation_files_items = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
-};
-
-export type mutation_createFineTune_result_files_items = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
-};
-
-export type mutation_createFineTune_events_items = {
-  object: Scalars['String'];
-  created_at: Scalars['Int'];
-  level: Scalars['String'];
-  message: Scalars['String'];
-};
-
-export type createFineTune_request_Input = {
+export type CreateFineTuneRequest_Input = {
   /**
    * The ID of an uploaded file that contains training data.
    *
@@ -1004,69 +897,13 @@ export type createFineTune_request_Input = {
   suffix?: InputMaybe<Scalars['mutationInput_createFineTune_input_suffix']>;
 };
 
-export type mutation_cancelFineTune = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  created_at: Scalars['Int'];
-  updated_at: Scalars['Int'];
-  model: Scalars['String'];
-  fine_tuned_model?: Maybe<Scalars['String']>;
-  organization_id: Scalars['String'];
-  status: Scalars['String'];
-  hyperparams: Scalars['JSON'];
-  training_files: Array<Maybe<mutation_cancelFineTune_training_files_items>>;
-  validation_files: Array<Maybe<mutation_cancelFineTune_validation_files_items>>;
-  result_files: Array<Maybe<mutation_cancelFineTune_result_files_items>>;
-  events?: Maybe<Array<Maybe<mutation_cancelFineTune_events_items>>>;
-};
-
-export type mutation_cancelFineTune_training_files_items = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
-};
-
-export type mutation_cancelFineTune_validation_files_items = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
-};
-
-export type mutation_cancelFineTune_result_files_items = {
-  id: Scalars['String'];
-  object: Scalars['String'];
-  bytes: Scalars['Int'];
-  created_at: Scalars['Int'];
-  filename: Scalars['String'];
-  purpose: Scalars['String'];
-  status?: Maybe<Scalars['String']>;
-  status_details?: Maybe<Scalars['JSON']>;
-};
-
-export type mutation_cancelFineTune_events_items = {
-  object: Scalars['String'];
-  created_at: Scalars['Int'];
-  level: Scalars['String'];
-  message: Scalars['String'];
-};
-
-export type deleteModel_200_response = {
+export type DeleteModelResponse = {
   id: Scalars['String'];
   object: Scalars['String'];
   deleted: Scalars['Boolean'];
 };
 
-export type createModeration_200_response = {
+export type CreateModerationResponse = {
   id: Scalars['String'];
   model: Scalars['String'];
   results: Array<Maybe<mutation_createModeration_results_items>>;
@@ -1098,7 +935,7 @@ export type mutation_createModeration_results_items_category_scores = {
   violence_graphic: Scalars['Float'];
 };
 
-export type createModeration_request_Input = {
+export type CreateModerationRequest_Input = {
   input: Array<InputMaybe<Scalars['String']>>;
   /**
    * Two content moderations models are available: `text-moderation-stable` and `text-moderation-latest`.
@@ -1148,7 +985,9 @@ export type HTTPMethod =
   };
 
   export type MutationSdk = {
-      /** Creates a new edit for the provided input, instruction, and parameters **/
+      /** Creates a completion for the provided prompt and parameters **/
+  createCompletion: InContextSdkMethod<Mutation['createCompletion'], MutationcreateCompletionArgs, MeshContext>,
+  /** Creates a new edit for the provided input, instruction, and parameters **/
   createEdit: InContextSdkMethod<Mutation['createEdit'], MutationcreateEditArgs, MeshContext>,
   /** Creates an image given a prompt. **/
   createImage: InContextSdkMethod<Mutation['createImage'], MutationcreateImageArgs, MeshContext>,
