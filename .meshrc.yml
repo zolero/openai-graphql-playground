@@ -1,0 +1,8 @@
+sources:
+  - name: OpenAI
+    handler:
+      openapi:
+        source: ./openai-spec3.json
+        baseUrl: https://api.openai.com
+        operationHeaders:
+          Authorization: 'Bearer {env.OPENAI_TOKEN}'

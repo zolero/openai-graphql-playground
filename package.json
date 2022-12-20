@@ -1,0 +1,40 @@
+{
+  "name": "oopenai-graphql-playground",
+  "version": "0.1.0",
+  "author": "Joost van Berkel",
+  "scripts": {
+    "dev": "tsup --watch --onSuccess \"node dist/index.js\"",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "mesh": "mesh build --dir src",
+    "lint": "eslint -c .eslintrc",
+    "predev": "yarn mesh"
+  },
+  "dependencies": {
+    "@graphql-mesh/cli": "0.82.6",
+    "@graphql-mesh/graphql": "^0.33.5",
+    "@graphql-mesh/openapi": "0.35.5",
+    "@graphql-mesh/transform-encapsulate": "^0.4.4",
+    "@graphql-mesh/transform-extend": "^0.11.3",
+    "@graphql-mesh/transform-filter-schema": "^0.15.4",
+    "@graphql-mesh/transform-naming-convention": "^0.13.4",
+    "@graphql-mesh/transform-resolvers-composition": "^0.13.3",
+    "dotenv-defaults": "^5.0.2",
+    "express": "^4.18.2",
+    "graphql": "16.6.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.15",
+    "@types/node": "18.11.17",
+    "@typescript-eslint/eslint-plugin": "^5.47.0",
+    "@typescript-eslint/parser": "^5.47.0",
+    "eslint": "^8.30.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.1",
+    "tsup": "^6.5.0",
+    "typescript": "4.9.4",
+    "webpack": "^5.75.0"
+  },
+  "license": "MIT"
+}
