@@ -1,3 +1,4 @@
+
 # OpenAi - Graphql Playground
 This project creates a featured OpenAI graphql playground using graphql-mesh.
 
@@ -10,7 +11,6 @@ This project creates a featured OpenAI graphql playground using graphql-mesh.
 - 📏 Linter with  [ESLint](https://eslint.org/)
 - 💖 Code Formatter with  [Prettier](https://prettier.io/)
 - 💯 Bundler [TSUP](https://github.com/egoist/tsup#%EF%B8%8F-install)
-
 
 ## ⚙️ Installation
 ### Getting started
@@ -43,3 +43,6 @@ OPENAI_TOKEN=changeme
 PORT=8500
 CORS=*
 ```
+
+## ⚙️ Preview OpenAI - Graphql Playground
+![OpenAI - Graphql Playground](https://puu.sh/JuB6B/2a78786925.gif)
