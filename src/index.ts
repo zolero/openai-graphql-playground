@@ -23,8 +23,6 @@ class Server {
         // Initialize graphql
         this.graphql = createYoga({
             graphiql: {
-                defaultVariableEditorOpen: false,
-                headerEditorEnabled: false,
                 title: "Graphql API",
                 credentials: "include"
             },

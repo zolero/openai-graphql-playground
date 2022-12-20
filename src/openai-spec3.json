@@ -1139,6 +1139,24 @@
             "description": "ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them.",
             "type": "string"
           },
+          "prompt": {
+            "description": "The prompt(s) to generate completions for, encoded as a string, array of strings, array of tokens, or array of token arrays.\n\nNote that <|endoftext|> is the document separator that the model sees during training, so if a prompt is not specified the model will generate as if from the beginning of a new document.\n",
+            "oneOf": [
+              {
+                "type": "string",
+                "default": "",
+                "example": "This is a test."
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "default": "",
+                  "example": "This is a test."
+                }
+              }
+            ]
+          },
           "suffix": {
             "description": "The suffix that comes after a completion of inserted text.",
             "default": null,
