@@ -5,7 +5,6 @@ services:
     build:
       context: .
       dockerfile: docker/node/Dockerfile
-    command: npm run build
     expose:
       - 8500
     ports:
