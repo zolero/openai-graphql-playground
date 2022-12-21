@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  api:
+    container_name: ${DOCKER_STACK}-api
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    command: npm run build
+    expose:
+      - 8500
+    ports:
+      - 8500:8500
+    environment:
+      - PORT=8500
+      - NODE_ENV=production
+      - VIRTUAL_HOST=${API_VIRTUAL_HOST}
+      - LETSENCRYPT_HOST=${API_LETSENCRYPT_HOST}
+      - LETSENCRYPT_EMAIL=${API_LETSENCRYPT_EMAIL}
+    restart: "no"
+    volumes:
+      - api-data:/app/dist/
+volumes:
+  api-data:
+    name: ${DOCKER_STACK}-api-data
+#networks:
+#  default:
+#    name: nginx-proxy
+#    external: true
